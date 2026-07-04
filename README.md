@@ -15,19 +15,21 @@ This is an [Expo](https://expo.dev) project!
 
 1. Install [`npm`](https://www.npmjs.com/) and [`bun`](https://bun.com/) via your preferred method
 
-2. Install dependencies
+2. Clone this repository and open a terminal in local clone
+
+3. Install dependencies
 
    ```bash
    npm install
    ```
 
-3. Start the app
+4. Start the app
 
    ```bash
    bun start
    ```
 
-This will automatically start the project for [Expo Go](https://expo.dev/go), as well as produce a web bundle.
+This will automatically start the project for use with [Expo Go](https://expo.dev/go), as well as produce a web bundle at https://localhost:8081.
 
 Download the Expo Go app for [App Store](https://apps.apple.com/us/app/expo-go/id982107779) or [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en_US). You can then scan the QR code provided in the terminal to access a native build of the app
 
@@ -40,7 +42,7 @@ As Expo Go's libraries are quite limited, this project will soon be made into a 
 Libraries:
 - React.js
 - React Native
-- Expo Go
+- Expo
 
 <br/>
 
@@ -53,7 +55,7 @@ Routing & Package Management:
 <br/>
 
 Icons & Media:
-- Apple FL Icons
+- Apple SF Symbols
 
 ## Learn more
 
