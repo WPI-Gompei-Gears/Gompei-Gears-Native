@@ -1,39 +1,59 @@
-# Welcome to your Expo app 👋
+# Gompei's Gears React Native
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+🚴 The React.js Native App version of the Gompei Gears rental app for the WPI Green Team.  
 
-## Get started
+🐐 Developed by Aiden Cunningham, RBE 2028
 
-1. Install dependencies
+### Photos:
+
+![App preview](README_photos/GGearsPreview.png)
+
+
+## Getting started with development
+
+This is an [Expo](https://expo.dev) project!
+
+1. Install [`npm`](https://www.npmjs.com/) and [`bun`](https://bun.com/) via your preferred method
+
+2. Install dependencies
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the app
 
    ```bash
-   npx expo start
+   bun start
    ```
 
-In the output, you'll find options to open the app in a
+This will automatically start the project for [Expo Go](https://expo.dev/go), as well as produce a web bundle.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Download the Expo Go app for [App Store](https://apps.apple.com/us/app/expo-go/id982107779) or [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent&hl=en_US). You can then scan the QR code provided in the terminal to access a native build of the app
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+As Expo Go's libraries are quite limited, this project will soon be made into a TestFlight build. For now, we work with Expo Go & the Expo SDK 54
 
-When you're ready, run:
+## This Project's Stack
 
-```bash
-npm run reset-project
-```
+Libraries:
+- React.js
+- React Native
+- Expo Go
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+<br/>
+
+Routing & Package Management:
+- Bun
+- npx
+- Metro Router
+- Supabase PostGreSQL
+
+<br/>
+
+Icons & Media:
+- Apple FL Icons
 
 ## Learn more
 
@@ -41,6 +61,12 @@ To learn more about developing your project with Expo, look at the following res
 
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+
+Other build options:
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 
 ## Join the community
 
