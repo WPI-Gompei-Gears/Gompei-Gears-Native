@@ -1,7 +1,8 @@
+import { SharedRefType } from 'expo';
 import { GlassView } from 'expo-glass-effect';
 import { Image } from 'expo-image';
 import { Href, Link, RelativePathString } from 'expo-router';
-import { DimensionValue, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { DimensionValue, ImageSource, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function NativeButton({
     title,
@@ -11,14 +12,16 @@ export default function NativeButton({
     iw,
     ih,
     link,
+    mobileOnly,
 }: {
     title? : string,
-    icon? : NodeJS.Require,
+    icon? : any, // allow require(...) or uri string
     w? : DimensionValue,
     h? : number,
     iw? : DimensionValue,
     ih? : DimensionValue,
     link : Href,
+    mobileOnly? : boolean,
 }) {
     const styles = StyleSheet.create({
         glass1: {

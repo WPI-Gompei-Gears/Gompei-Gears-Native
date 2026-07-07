@@ -5,6 +5,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
+import NativeButton from '@/components/button/button';
+import signInWithAzure from '@/app/auth/oAuth';
 
 export default function TabTwoScreen() {
   return (
@@ -26,8 +28,9 @@ export default function TabTwoScreen() {
           }}>
           Your Account
         </ThemedText>
+        <ThemedText>See account details below</ThemedText>
+        <NativeButton link="/auth/oAuth" title='Login' w={200}></NativeButton>
       </ThemedView>
-      <ThemedText>See account details below</ThemedText>
     </ParallaxScrollView>
   );
 }
@@ -40,7 +43,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   titleContainer: {
-    flexDirection: 'row',
     gap: 8,
   },
 });

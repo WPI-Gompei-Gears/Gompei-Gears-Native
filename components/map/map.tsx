@@ -15,14 +15,14 @@ export default function LocalMap({
   pins
 } : {
   APIKey?: string,
-  pins?: { lat: number, lng: number, type: number }[]
+  pins?: { name: string, lat: number, lng: number, type: number }[]
 }) {
 
   const pinMarkers = pins?.map((pin, index) => {
     // const pinImg = require(`../assets/pins/pin${pin.type}.png`)
 
     return (
-      <AdvancedMarker key={index} position={{lat: pin.lat, lng: pin.lng}}>
+      <AdvancedMarker key={index} position={{lat: pin.lat, lng: pin.lng}} title={pin.name}>
         <Image source={PIN_SOURCES[pin.type]} style={{ width: 50, height: 62, alignSelf: 'center' }}></Image>
       </AdvancedMarker>
     )
@@ -33,8 +33,8 @@ export default function LocalMap({
       <APIProvider apiKey={APIKey ?? ""}>
         <Map
           style={{flex: 1}}
-          defaultCenter={{lat: 22.54992, lng: 0}}
-          defaultZoom={3}
+          defaultCenter={{lat: 42.2738260, lng: -71.8097721}}
+          defaultZoom={15}
           gestureHandling='greedy'
           disableDefaultUI
           mapId="DEMO_MAP_ID"

@@ -13,8 +13,8 @@ export default function LocalMap({
   APIKey,
   pins
 } : {
-  APIKey: string,
-  pins?: { lat: number, lng: number, type: number }[]
+  APIKey?: string,
+  pins?: { name: string, lat: number, lng: number, type: number }[]
 }) {
   const pinMarkers = pins?.map((pin, index) => {
       // const pinImg = require(`../assets/pins/pin${pin.type}.png`)
@@ -22,7 +22,7 @@ export default function LocalMap({
       return (
         <Marker
           key={index}
-          title='Bike Pin'
+          title={pin.name}
           coordinate={{ latitude: pin.lat, longitude: pin.lng }}
         >
           <Image source={PIN_SOURCES[pin.type]} style={{ width: 50, height: 62, transform: "translate(0%, -50%)" }}></Image>
@@ -30,7 +30,14 @@ export default function LocalMap({
       )
     })
 
-  return <MapView style={{ flex: 1 }} >
+  return <MapView style={{ flex: 1 }} 
+    initialRegion={{
+      latitude: 42.2738260, // Central latitude coordinate
+      longitude: -71.8097721, // Central longitude coordinate
+      latitudeDelta: 0.02, // Vertical span (zoom level)
+      longitudeDelta: 0.02, // Horizontal span (zoom level)
+    }}
+  >
     {pinMarkers}
   </MapView>;
 }

@@ -1,5 +1,6 @@
-import { Href, RelativePathString } from "expo-router";
-import { Button, DimensionValue } from "react-native";
+import { Image } from "expo-image";
+import { Href, Link, RelativePathString } from "expo-router";
+import { Button, DimensionValue, Text, TouchableOpacity, View } from "react-native";
 
 export default function NativeButton({
     title,
@@ -9,16 +10,28 @@ export default function NativeButton({
     iw,
     ih,
     link,
+    mobileOnly,
 }: {
     title? : string,
-    icon? : NodeJS.Require,
+    icon? : any, // allow require(...) or uri string
     w? : DimensionValue,
     h? : number,
     iw? : DimensionValue,
     ih? : DimensionValue,
     link : Href,
+    mobileOnly? : boolean,
 }) {
-    return (
-        <Button title={title ?? ""}></Button>
-    )
+    if(!mobileOnly) {
+        return (
+            <Link href={link}>
+                <TouchableOpacity>
+                    {icon && (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}}></Image>)}
+                    {(icon && title) && <View style={{width: 10}}></View>}
+                    {title && <Text style={{fontSize: h ? h/2.5 : 20}}>{title}</Text>}
+                </TouchableOpacity>
+            </Link>
+        )
+    } else {
+        return <></>
+    }
 }
