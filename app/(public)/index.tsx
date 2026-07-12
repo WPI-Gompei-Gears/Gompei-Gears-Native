@@ -4,7 +4,8 @@ import NativeButton from '@/components/button/button';
 import LocalMap from '@/components/map/map';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { supabase } from '@/lib/supabase';
 
 export default function HomeScreen() {
@@ -12,8 +13,23 @@ export default function HomeScreen() {
 
   const [bicycles, setBicycles] = useState<any[]>([])
   
+  const appState = useRef(AppState.currentState)
+
   useEffect(() => {
     getInstruments()
+    const interval = setInterval(getInstruments, 5_000)
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appState.current !== 'active' && nextState === 'active') {
+        getInstruments()
+      }
+      appState.current = nextState
+    })
+
+    return () => {
+      clearInterval(interval)
+      subscription.remove()
+    }
   }, [])
 
   async function getInstruments() {
