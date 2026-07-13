@@ -12,6 +12,7 @@ ENV EXPO_PUBLIC_SUPABASE_ANON_KEY=$EXPO_PUBLIC_SUPABASE_ANON_KEY
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN bun i
 RUN npx expo export --platform web
 
 # Serve stage
