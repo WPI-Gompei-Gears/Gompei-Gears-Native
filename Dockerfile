@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS build
+FROM oven/bun:1 AS build
 WORKDIR /app
 
 # Accept build arg and expose it as env var for the build step
