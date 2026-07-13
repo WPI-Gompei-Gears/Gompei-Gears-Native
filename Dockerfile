@@ -9,7 +9,8 @@ ENV EXPO_PUBLIC_SUPABASE_URL=$EXPO_PUBLIC_SUPABASE_URL
 ENV EXPO_PUBLIC_SUPABASE_ANON_KEY=$EXPO_PUBLIC_SUPABASE_ANON_KEY
 
 # Finish building
-COPY package*.json ./
+FROM build AS install
+COPY package.json bun.lockb ./
 RUN bun i --frozen-lockfile
 COPY . .
 RUN bun expo export --platform web
