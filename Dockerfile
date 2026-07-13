@@ -10,9 +10,8 @@ ENV EXPO_PUBLIC_SUPABASE_ANON_KEY=$EXPO_PUBLIC_SUPABASE_ANON_KEY
 
 # Finish building
 COPY package*.json ./
-RUN npm ci
+RUN bun i --frozen-lockfile
 COPY . .
-RUN bun i
 RUN npx expo export --platform web
 
 # Serve stage
