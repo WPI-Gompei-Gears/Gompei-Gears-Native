@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM oven/bun:1 AS build
 WORKDIR /app
 
@@ -11,11 +13,14 @@ ENV EXPO_PUBLIC_SUPABASE_URL=${EXPO_PUBLIC_SUPABASE_URL} \
 
 # Install dependencies with Bun
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,id=gompei-gears-native-node-modules,target=/app/node_modules,sharing=locked \
+    bun install --frozen-lockfile
 
 # Export production static build
 COPY . .
-RUN bun expo export --platform web
+RUN --mount=type=cache,id=gompei-gears-native-node-modules,target=/app/node_modules,sharing=locked \
+    bun install --frozen-lockfile && \
+    bun expo export --platform web
 
 # Launch nginx server
 FROM nginx:alpine
