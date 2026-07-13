@@ -1,0 +1,10 @@
+.git
+.expo
+.env*
+node_modules
+dist
+web-build
+ios
+android
+*.log
+*.tsbuildinfo
