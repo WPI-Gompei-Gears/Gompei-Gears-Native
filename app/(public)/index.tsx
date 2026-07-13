@@ -37,9 +37,14 @@ export default function HomeScreen() {
     setBicycles(data || [])
   }
 
-  const pins = bicycles.map((bicycle: any) => (
-    {name: `WPI${bicycle.bike_id}`, lat: bicycle.lat, lng: bicycle.lng, type: bicycle.quality}
-  ))
+  const pins = bicycles
+    .filter((bicycle: any) => bicycle.lat != null && bicycle.lng != null)
+    .map((bicycle: any) => ({
+      name: `WPI${bicycle.bike_id}`,
+      latitude: Number(bicycle.lat),
+      longitude: Number(bicycle.lng),
+      type: Number(bicycle.quality),
+    }))
 
   return (
     <View style={{flex: 1}}>

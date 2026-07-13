@@ -11,11 +11,9 @@ export default function TitleBar({
     returnLink: Href,
     title: string,
 }) {
-    const insets = useSafeAreaInsets()
-
      const styles = StyleSheet.create({
       container: {
-        marginTop: insets.top + 10,
+        marginTop: 10,
         marginBottom: 15,
         width: "100%",
       },

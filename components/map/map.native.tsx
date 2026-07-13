@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { MapPolyline, Marker, Polygon, Polyline } from 'react-native-maps';
 
 const PIN_SOURCES: Record<number, string> = {
   0: require('@/assets/pins/pin0.svg'),
@@ -11,10 +11,14 @@ const PIN_SOURCES: Record<number, string> = {
 
 export default function LocalMap({
   APIKey,
-  pins
+  pins,
+  routes,
+  zones,
 } : {
   APIKey?: string,
-  pins?: { name: string, lat: number, lng: number, type: number }[]
+  pins?: { name: string, latitude: number, longitude: number, type: number }[]
+  routes?: { latitude: number, longitude: number }[][]
+  zones?: { name: string, borders: { latitude: number, longitude: number }[]}[]
 }) {
   const pinMarkers = pins?.map((pin, index) => {
       // const pinImg = require(`../assets/pins/pin${pin.type}.png`)
@@ -23,12 +27,36 @@ export default function LocalMap({
         <Marker
           key={index}
           title={pin.name}
-          coordinate={{ latitude: pin.lat, longitude: pin.lng }}
+          coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}
         >
           <Image source={PIN_SOURCES[pin.type]} style={{ width: 50, height: 62, transform: "translate(0%, -50%)" }}></Image>
         </Marker>
       )
     })
+
+  const routeLines = routes?.map((route, index) => {
+    return (
+      <Polyline
+        key={index}
+        coordinates={route}
+        strokeColor="#007AFF"
+        strokeWidth={4}
+      >
+      </Polyline>
+    )
+  })
+
+  const zonePolygons = zones?.map((zone, index) => {
+    return (
+      <Polygon
+        coordinates={zone.borders}
+        strokeColor="#2F80ED" // Line color
+        strokeWidth={3}        // Line thickness
+        fillColor="rgba(47, 128, 237, 0.3)" // Shape interior color
+      >
+      </Polygon>
+    )
+  })
 
   return <MapView style={{ flex: 1 }} 
     initialRegion={{
@@ -39,5 +67,7 @@ export default function LocalMap({
     }}
   >
     {pinMarkers}
+    {routeLines}
+
   </MapView>;
 }

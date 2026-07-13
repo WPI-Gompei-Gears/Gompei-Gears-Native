@@ -1,4 +1,4 @@
-import { AdvancedMarker, APIProvider, Map } from '@vis.gl/react-google-maps';
+import { AdvancedMarker, APIProvider, Map, Polygon, Polyline } from '@vis.gl/react-google-maps';
 import { Image } from 'expo-image';
 import { View } from 'react-native';
 
@@ -12,21 +12,44 @@ const PIN_SOURCES: Record<number, string> = {
 
 export default function LocalMap({
   APIKey,
-  pins
+  pins,
+  routes,
+  zones,
 } : {
   APIKey?: string,
-  pins?: { name: string, lat: number, lng: number, type: number }[]
+  pins?: { name: string, latitude: number, longitude: number, type: number }[]
+  routes?: { latitude: number, longitude: number }[][]
+  zones?: { name: string, borders: { latitude: number, longitude: number }[]}[]
 }) {
 
   const pinMarkers = pins?.map((pin, index) => {
     // const pinImg = require(`../assets/pins/pin${pin.type}.png`)
 
     return (
-      <AdvancedMarker key={index} position={{lat: pin.lat, lng: pin.lng}} title={pin.name}>
+      <AdvancedMarker key={index} position={{lat: pin.latitude, lng: pin.longitude}} title={pin.name}>
         <Image source={PIN_SOURCES[pin.type]} style={{ width: 50, height: 62, alignSelf: 'center' }}></Image>
       </AdvancedMarker>
     )
   })
+
+  const routeLines = routes?.map((route, index) => (
+    <Polyline
+      key={index}
+      path={route.map((point) => ({ lat: point.latitude, lng: point.longitude }))}
+      strokeColor="#007AFF"
+      strokeWeight={4}
+    />
+  ))
+
+  const zonePolygons = zones?.map((zone, index) => (
+    <Polygon
+      key={index}
+      paths={zone.borders.map((point) => ({ lat: point.latitude, lng: point.longitude }))}
+      strokeColor="#2F80ED"
+      strokeWeight={3}
+      fillColor="rgba(47, 128, 237, 0.3)"
+    />
+  ))
 
   return (
     <View style={{flex: 1}}>
@@ -40,6 +63,8 @@ export default function LocalMap({
           mapId="DEMO_MAP_ID"
         >
           {pinMarkers}
+          {routeLines}
+          {zonePolygons}
         </Map>
       </APIProvider>
     </View>
