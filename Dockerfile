@@ -12,7 +12,7 @@ ENV EXPO_PUBLIC_SUPABASE_ANON_KEY=$EXPO_PUBLIC_SUPABASE_ANON_KEY
 COPY package*.json ./
 RUN bun i --frozen-lockfile
 COPY . .
-RUN npx expo export --platform web
+RUN bun expo export --platform web
 
 # Serve stage
 FROM nginx:alpine
