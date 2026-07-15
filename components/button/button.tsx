@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { Href, Link, RelativePathString } from "expo-router";
 import { Button, DimensionValue, Text, TouchableOpacity, View } from "react-native";
+import { SizableText } from "tamagui";
 
 export default function NativeButton({
     title,
@@ -27,7 +28,7 @@ export default function NativeButton({
                 <TouchableOpacity>
                     {icon && (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}}></Image>)}
                     {(icon && title) && <View style={{width: 10}}></View>}
-                    {title && <Text style={{fontSize: h ? h/2.5 : 20}}>{title}</Text>}
+                    {title && <SizableText color="$color" style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
                 </TouchableOpacity>
             </Link>
         )

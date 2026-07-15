@@ -12,16 +12,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <TamaguiProvider config={config} defaultTheme="light">
-        <Stack>
-          <Stack.Screen name="(public)" options={{ headerShown: false }} />
-          <Stack.Screen name="admin" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="bike/[id]" options={{ presentation: 'modal', headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" animated />
-      </TamaguiProvider>
-    </ThemeProvider>
+    <TamaguiProvider config={config} defaultTheme="light">
+      <Stack>
+        <Stack.Screen name="(public)" options={{ headerShown: false }} />
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="bike/[id]" options={{ presentation: 'modal', headerShown: false }} />
+      </Stack>
+      <StatusBar style="auto" animated />
+    </TamaguiProvider>
   );
 }
