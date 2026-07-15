@@ -4,6 +4,18 @@ import { createAnimations } from '@tamagui/animations-react-native'
 
 const config = createTamagui({
   ...defaultConfig,
+    themes: {
+        ...defaultConfig.themes,
+
+        // Global color override for buttons in Light Mode
+        light_Button: {
+            background: '#ac2b37',         // Main button color (e.g., Blue)
+            backgroundHover: '#8f2934',    // Color on hover
+            backgroundPress: '#7b232c',    // Color when pressed
+            backgroundFocus: '#8f2934',
+            color: '#ffffff',              // Text color inside button
+        }
+    },
     media: {
         ...defaultConfig.media,
         // add your own media queries here, if wanted

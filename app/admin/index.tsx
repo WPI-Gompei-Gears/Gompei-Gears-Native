@@ -8,6 +8,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import TitleBar from '@/components/titlebar';
 
 export default function AdminRides() {
+  const insets = useSafeAreaInsets()
+
   const [instruments, setInstruments] = useState<any[]>([])
 
   useEffect(() => {
@@ -19,24 +21,12 @@ export default function AdminRides() {
     setInstruments(data || [])
   }
 
-  return (
-      <ThemedView style={styles.container}>
-        <TitleBar title='Rides' returnLink={"/(public)"}></TitleBar>
-        <FlatList
-          data={instruments}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <Text style={styles.item}>{item.data}</Text>}
-        />
-      </ThemedView>
-  )
-
-}
-
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 15,
+    marginTop: insets.top
   },
   item: {
     padding: 16,
@@ -44,3 +34,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
 })
+
+  return (
+      <View style={styles.container}>
+        <TitleBar title='Rides' returnLink={"/(public)"}></TitleBar>
+        <FlatList
+          data={instruments}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <Text style={styles.item}>{item.data}</Text>}
+        />
+      </View>
+  )
+
+}

@@ -1,3 +1,9 @@
 ios
 android
+node_modules
+dist
+.expo
+.git
+.env*
+coverage
 *.log
