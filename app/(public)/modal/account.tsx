@@ -7,8 +7,21 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 import NativeButton from '@/components/button/button';
 import signInWithAzure from '@/app/auth/oAuth';
+import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { SizableText } from 'tamagui';
 
 export default function TabTwoScreen() {
+  const [user, setUser] = useState<User>()
+
+  async function getAccount() {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    setUser(user || undefined)
+  }
+
+  getAccount()
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -29,6 +42,7 @@ export default function TabTwoScreen() {
           Your Account
         </ThemedText>
         <ThemedText>See account details below</ThemedText>
+        <SizableText>Signed in as: {user?.user_metadata?.name}</SizableText>
         <NativeButton link="/auth/oAuth" title='Login' w={200}></NativeButton>
       </ThemedView>
     </ParallaxScrollView>
