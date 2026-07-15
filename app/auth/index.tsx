@@ -23,10 +23,20 @@ export default function rerouteoAuth() {
 
       console.log(targetUrl);
 
-      // 3. Open in the system browser
-      const supported = await Linking.canOpenURL(targetUrl);
-      if (supported) {
-        await Linking.openURL(targetUrl);
+      // 3. Continue the OAuth flow in the same browser tab/popup.
+      // This page only ever loads inside a real browser context (Azure's
+      // redirect_uri is an https URL, not a native deep link), so `window`
+      // is always available here. Linking.openURL defaults to `target:
+      // '_blank'` on web, which would open a *new* window instead of
+      // navigating this one — breaking WebBrowser.openAuthSessionAsync's
+      // ability to detect completion.
+      if (typeof window !== 'undefined') {
+        window.location.replace(targetUrl);
+      } else {
+        const supported = await Linking.canOpenURL(targetUrl);
+        if (supported) {
+          await Linking.openURL(targetUrl);
+        }
       }
     };
 

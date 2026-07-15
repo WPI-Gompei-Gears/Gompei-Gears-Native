@@ -11,21 +11,26 @@ import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Avatar, Button, Form, Input, ScrollView, SizableText, Spacer, YStack } from 'tamagui';
 import FormInput from '@/components/forminput';
-import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+import {makeRedirectUri} from 'expo-auth-session';
+
+const redirectTo = makeRedirectUri();
+
+// Required on web: closes the auth popup once it lands back on this page.
+// No-op on native, so it's safe to call unconditionally.
+WebBrowser.maybeCompleteAuthSession();
 
 async function signInWithAzure() {
   // Final landing spot back in the app once Supabase finishes processing
   // the Azure callback (Azure itself redirects to MyURL/auth, which
   // forwards to Supabase's /auth/v1/callback, which then redirects here).
-  const redirectTo = Linking.createURL('/modal/account');
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'azure',
     options: {
       scopes: 'email profile',
       redirectTo,
-      skipBrowserRedirect: true,
     },
   })
   if (error || !data?.url) return;
@@ -78,7 +83,7 @@ export default function TabTwoScreen() {
               <Button>Login as Admin</Button>
             </>
           ) : (
-            <Button onClick={signInWithAzure}>Login</Button>
+            <Button onPress={signInWithAzure}>Login</Button>
           )
         }
       </YStack>
