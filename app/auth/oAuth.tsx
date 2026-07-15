@@ -8,7 +8,8 @@ async function signInWithAzure() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'azure',
     options: {
-      scopes: 'email profile'
+      scopes: 'email profile',
+      redirectTo: `${window.location.origin}/modal/account`
     },
   })
 }
