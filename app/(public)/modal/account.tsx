@@ -15,7 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import {makeRedirectUri} from 'expo-auth-session';
 
-const redirectTo = makeRedirectUri();
+const redirectTo = makeRedirectUri({ path: '/modal/account' });
 
 // Required on web: closes the auth popup once it lands back on this page.
 // No-op on native, so it's safe to call unconditionally.
@@ -31,6 +31,7 @@ async function signInWithAzure() {
     options: {
       scopes: 'email profile',
       redirectTo,
+      skipBrowserRedirect: true,
     },
   })
   if (error || !data?.url) return;
