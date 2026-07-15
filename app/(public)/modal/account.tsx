@@ -1,18 +1,12 @@
 import { StyleSheet } from 'react-native';
 
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
-import NativeButton from '@/components/button/button';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Avatar, Button, Form, Input, ScrollView, SizableText, Spacer, YStack } from 'tamagui';
 import FormInput from '@/components/forminput';
 import * as WebBrowser from 'expo-web-browser';
-import * as QueryParams from "expo-auth-session/build/QueryParams";
 import {makeRedirectUri} from 'expo-auth-session';
 
 const redirectTo = makeRedirectUri({ path: '/modal/account' });
@@ -48,8 +42,23 @@ async function signInWithAzure() {
   }
 }
 
+async function signInAsDevAccount(role: 'user' | 'admin') {
+  const email = role === 'admin'
+    ? process.env.EXPO_PUBLIC_DEV_ADMIN_EMAIL
+    : process.env.EXPO_PUBLIC_DEV_USER_EMAIL;
+  const password = role === 'admin'
+    ? process.env.EXPO_PUBLIC_DEV_ADMIN_PASSWORD
+    : process.env.EXPO_PUBLIC_DEV_USER_PASSWORD;
+  if (!email || !password) return;
+
+  await supabase.auth.signInWithPassword({ email, password });
+}
+
 export default function TabTwoScreen() {
   const [user, setUser] = useState<User>()
+  const [preferredName, setPreferredName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -58,6 +67,30 @@ export default function TabTwoScreen() {
 
     return () => subscription.subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+
+    supabase
+      .from('profiles')
+      .select('preferred_name, phone_number, is_admin')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        setPreferredName(data?.preferred_name ?? '')
+        setPhoneNumber(data?.phone_number ?? '')
+        setIsAdmin(data?.is_admin ?? false)
+      })
+  }, [user])
+
+  async function saveProfile() {
+    if (!user) return
+
+    await supabase
+      .from('profiles')
+      .update({ preferred_name: preferredName, phone_number: phoneNumber })
+      .eq('id', user.id)
+  }
 
   return (
     <ScrollView flex={1} p="$5">
@@ -69,19 +102,19 @@ export default function TabTwoScreen() {
         <SizableText size={"$8"}>Your Account</SizableText>
         {/* <Spacer></Spacer> */}
         {user ? (
-          <Form gap={"$4"}>
+          <Form gap={"$4"} onSubmit={saveProfile}>
             <FormInput title="Name" value={user?.user_metadata?.name} disabled/>
             <FormInput title="Email" value={user?.email} disabled/>
-            <FormInput title="Preferred Name"/>
-            <FormInput title="Phone Number"/>
+            <FormInput title="Preferred Name" value={preferredName} onChangeText={setPreferredName}/>
+            <FormInput title="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber}/>
             <Form.Trigger asChild>
               <Button width={"50%"} ml={"25%"}>Save</Button>
             </Form.Trigger>
           </Form>
         ) : process.env.EXPO_PUBLIC_IS_DEVELOPMENT_ENV == "true" ? (
             <>
-              <Button>Login as User</Button>
-              <Button>Login as Admin</Button>
+              <Button onPress={() => signInAsDevAccount('user')}>Login as User</Button>
+              <Button onPress={() => signInAsDevAccount('admin')}>Login as Admin</Button>
             </>
           ) : (
             <Button onPress={signInWithAzure}>Login</Button>
