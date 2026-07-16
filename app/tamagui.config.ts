@@ -43,6 +43,10 @@ const config = createTamagui({
             stiffness: 100,  // Higher stiffness speeds up the snap-back
         },
     }),
+    settings: {
+        ...defaultConfig.settings,
+        onlyAllowShorthands: false,
+    }
 })
 
 export default config

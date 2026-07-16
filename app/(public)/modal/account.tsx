@@ -8,6 +8,9 @@ import FormInput from '@/components/forminput';
 import * as WebBrowser from 'expo-web-browser';
 import {makeRedirectUri} from 'expo-auth-session';
 import { useSession } from '@/contexts/session';
+import { BriefcaseConveyorBelt, PanelBottomClose } from '@tamagui/lucide-icons-2';
+import { router } from 'expo-router';
+import NativeButton from '@/components/button/button';
 
 const redirectTo = makeRedirectUri({ path: '/modal/account' });
 
@@ -111,7 +114,7 @@ export default function TabTwoScreen() {
                 <AnimatePresence>
                   {submitting ? (
                     <Spinner
-                      transition="medium"
+                      transition="bouncy"
                       enterStyle={{ opacity: 0 }}
                       alignSelf="center"
                       key="spinner"

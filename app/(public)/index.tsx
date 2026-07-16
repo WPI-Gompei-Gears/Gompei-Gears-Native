@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import NativeButton from '@/components/button/button';
 import LocalMap from '@/components/map/map';
@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/contexts/session';
+import { Button, SizableText, XStack } from 'tamagui';
+import { Apple, Play } from '@tamagui/lucide-icons-2';
 
 export default function HomeScreen() {
   const { isAdmin } = useSession()
@@ -53,6 +55,13 @@ export default function HomeScreen() {
     <View style={{flex: 1}}>
       {/* <Text style={{marginTop: insets.top}}>{pins[0].name}</Text> */}
       <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins}/>
+      { Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
+        <XStack bg={"white"} borderRadius={"$8"} p="$5" justify={"center"} gap="$4">
+          <SizableText fontWeight={"bold"} size={"$6"}>Download the app to get started!</SizableText>
+          <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
+          <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
+        </XStack>
+      </XStack>}
       <Image style={{position: "absolute", top: insets.top + 10, left: "50%", height: 65, width: 65, transform: "translate(-50%, 0%)"}} source={require("@/assets/images/appicon240.png")}/>
       <View style={{position: "absolute", top: insets.top + 5, right: 25}}>
         <NativeButton link='/(public)/modal/account' icon={require("@/assets/images/person-crop-circle.png")}></NativeButton>
