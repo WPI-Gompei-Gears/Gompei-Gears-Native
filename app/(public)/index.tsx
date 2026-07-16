@@ -7,8 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { supabase } from '@/lib/supabase';
+import { useSession } from '@/contexts/session';
 
 export default function HomeScreen() {
+  const { isAdmin } = useSession()
+
   const insets = useSafeAreaInsets();
 
   const [bicycles, setBicycles] = useState<any[]>([])
@@ -54,9 +57,9 @@ export default function HomeScreen() {
       <View style={{position: "absolute", top: insets.top + 5, right: 25}}>
         <NativeButton link='/(public)/modal/account' icon={require("@/assets/images/person-crop-circle.png")}></NativeButton>
       </View>
-      <View style={{position: "absolute", top: insets.top + 5, left: 25}}>
+      {isAdmin && <View style={{position: "absolute", top: insets.top + 5, left: 25}}>
         <NativeButton link='/admin' icon={require("@/assets/images/bolt-circle.png")}></NativeButton>
-      </View>
+      </View>}
       <View style={{position: "absolute", bottom: 25, left: "50%", transform: "translate(-50%, 0%)"}}>
         <NativeButton link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60} mobileOnly></NativeButton>
       </View>

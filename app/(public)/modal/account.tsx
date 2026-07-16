@@ -3,11 +3,11 @@ import { StyleSheet } from 'react-native';
 import { Fonts } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import { Avatar, Button, Form, Input, ScrollView, SizableText, Spacer, YStack } from 'tamagui';
+import { AnimatePresence, Avatar, Button, Form, Input, ScrollView, SizableText, Spacer, Spinner, YStack } from 'tamagui';
 import FormInput from '@/components/forminput';
 import * as WebBrowser from 'expo-web-browser';
 import {makeRedirectUri} from 'expo-auth-session';
+import { useSession } from '@/contexts/session';
 
 const redirectTo = makeRedirectUri({ path: '/modal/account' });
 
@@ -55,73 +55,87 @@ async function signInAsDevAccount(role: 'user' | 'admin') {
 }
 
 export default function TabTwoScreen() {
-  const [user, setUser] = useState<User>()
+  const { session } = useSession()
+  const user = session?.user
   const [preferredName, setPreferredName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [isAdmin, setIsAdmin] = useState(false)
 
-  useEffect(() => {
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user)
-    })
-
-    return () => subscription.subscription.unsubscribe()
-  }, [])
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (!user) return
 
     supabase
       .from('profiles')
-      .select('preferred_name, phone_number, is_admin')
+      .select('preferred_name, phone_number')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         setPreferredName(data?.preferred_name ?? '')
         setPhoneNumber(data?.phone_number ?? '')
-        setIsAdmin(data?.is_admin ?? false)
       })
   }, [user])
 
   async function saveProfile() {
+    console.log("Saving...")
     if (!user) return
+
+    setSubmitting(true);
 
     await supabase
       .from('profiles')
       .update({ preferred_name: preferredName, phone_number: phoneNumber })
       .eq('id', user.id)
+
+    setSubmitting(false);
   }
 
   return (
-    <ScrollView flex={1} p="$5">
-      <YStack items="center" gap={"$4"}>
-        <Avatar circular size="$6">
-          <Avatar.Image src="http://picsum.photos/200/300" />
-          <Avatar.Fallback />
-        </Avatar>
-        <SizableText size={"$8"}>Your Account</SizableText>
-        {/* <Spacer></Spacer> */}
-        {user ? (
-          <Form gap={"$4"} onSubmit={saveProfile}>
-            <FormInput title="Name" value={user?.user_metadata?.name} disabled/>
+    <YStack items="center" gap={"$4"} mt="$6">
+      <Avatar circular size="$6">
+        <Avatar.Image src="http://picsum.photos/200/300" />
+        <Avatar.Fallback />
+      </Avatar>
+      <SizableText size={"$8"}>Your Account</SizableText>
+      {/* <Spacer></Spacer> */}
+      {user ? (
+        <>
+          <Form gap={"$4"} onSubmit={() => saveProfile()}>
+            <FormInput title="Name" value={user?.user_metadata?.full_name} disabled/>
             <FormInput title="Email" value={user?.email} disabled/>
             <FormInput title="Preferred Name" value={preferredName} onChangeText={setPreferredName}/>
             <FormInput title="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber}/>
             <Form.Trigger asChild>
-              <Button width={"50%"} ml={"25%"}>Save</Button>
+              <Button mx="5%">
+                Save
+                <AnimatePresence>
+                  {submitting ? (
+                    <Spinner
+                      transition="medium"
+                      enterStyle={{ opacity: 0 }}
+                      alignSelf="center"
+                      key="spinner"
+                      color={"white"}
+                      ml="$2"
+                      width={8}
+                    />
+                  ) : null}
+                </AnimatePresence>
+              </Button>
             </Form.Trigger>
           </Form>
-        ) : process.env.EXPO_PUBLIC_IS_DEVELOPMENT_ENV == "true" ? (
-            <>
-              <Button onPress={() => signInAsDevAccount('user')}>Login as User</Button>
-              <Button onPress={() => signInAsDevAccount('admin')}>Login as Admin</Button>
-            </>
-          ) : (
-            <Button onPress={signInWithAzure}>Login</Button>
-          )
-        }
-      </YStack>
-    </ScrollView>
+          <Button onPress={() => supabase.auth.signOut()}>Log Out</Button>
+        </>
+      ) : process.env.EXPO_PUBLIC_IS_DEVELOPMENT_ENV == "true" ? (
+          <>
+            <Button onPress={() => signInAsDevAccount('user')}>Login as User</Button>
+            <Button onPress={() => signInAsDevAccount('admin')}>Login as Admin</Button>
+          </>
+        ) : (
+          <Button onPress={signInWithAzure}>Login</Button>
+        )
+      }
+    </YStack>
   );
 }
 
