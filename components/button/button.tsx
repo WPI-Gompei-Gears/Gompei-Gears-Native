@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { Href, Link, RelativePathString } from "expo-router";
 import { ComponentProps, FunctionComponent, JSX } from "react";
 import { Button, DimensionValue, GestureResponderEvent, Platform, StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
-import { SizableText } from "tamagui";
+import { SizableText, XStack } from "tamagui";
 
 export default function NativeButton({
     title,
@@ -33,12 +33,14 @@ export default function NativeButton({
 }) {
     const button = (
         <TouchableOpacity style={style} onPress={link ? undefined : onPress}>
-            {icon ? 
-                (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}}></Image>):
-                iconElement
-            }
-            {(icon && title) && <View style={{width: 10}}></View>}
-            {title && <SizableText color="$color" style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
+            <XStack flexWrap="nowrap">
+                {icon ? 
+                    (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}}></Image>):
+                    iconElement
+                }
+                {(icon && title) && <View style={{width: 10}}></View>}
+                {title && <SizableText color="$color" style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
+            </XStack>
         </TouchableOpacity>
     )
 

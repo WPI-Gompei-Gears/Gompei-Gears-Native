@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { Href, Link, RelativePathString } from 'expo-router';
 import { ComponentProps, FunctionComponent, JSX } from 'react';
 import { DimensionValue, GestureResponderEvent, ImageSource, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { SizableText, XStack } from 'tamagui';
 
 export default function NativeButton({
     title,
@@ -42,6 +43,7 @@ export default function NativeButton({
             justifyContent: "center",
             alignItems: "center",
             flexDirection: "row",
+            flexWrap: "nowrap",
         },}
     )
 
@@ -52,7 +54,7 @@ export default function NativeButton({
                     (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}} />) :
                     iconElement}
                 {(icon && title) && <View style={{width: 10}} />}
-                {title && <Text style={{fontSize: h ? h/2.5 : 20}}>{title}</Text>}
+                {title && <SizableText flexWrap="nowrap" style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
             </GlassView>
         </TouchableOpacity>
     )

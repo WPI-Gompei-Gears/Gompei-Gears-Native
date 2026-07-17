@@ -4,10 +4,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Circle, Image, SizableText, Spacer, Text, View, XStack, YStack } from "tamagui";
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams } from "expo-router";
-import { Bike, Divide } from "@tamagui/lucide-icons-2";
+import { Apple, Bike, Divide, Play } from "@tamagui/lucide-icons-2";
 import AcceptSlider from "@/components/acceptslider";
 import LocalMap from "@/components/map/map";
 import { supabase } from "@/lib/supabase";
+import { Platform } from "react-native";
 
 export default function rentPage() {
     const [agreed, setAgreed] = useState(false)
@@ -36,11 +37,24 @@ export default function rentPage() {
 
     const centerLocation = pins[0] ? { latitude: pins[0].latitude - 0.0008, longitude: pins[0].longitude + 0.0006 } : undefined
 
-    if(agreed) {
+    if(Platform.OS == "web") {
+        return (
+            <View justify={"center"} alignItems="center" height="80%">
+                <YStack gap="$4" alignItems="center">
+                    <SizableText size="$8">Open the Mobile App to Start a Rental!</SizableText>
+                    <Image src={require("@/assets/images/appicon240.png").uri} width={"$10"} aspectRatio={1} />
+                    <XStack gap="$2">
+                        <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
+                        <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
+                    </XStack>
+                </YStack>
+            </View>
+        )
+    } else if(agreed) {
         return (
             <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
                 <YStack flex={1} alignItems="center" width={"100%"}>
-                    <View height={"70%"} width={"100%"} bblr="50%" bbrr="50%" overflow="hidden">
+                    <View height={"70%"} width={"100%"} style={{borderBottom: "50%"}} overflow="hidden">
                         <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
                     </View>
                     <Circle width={"$19"} justify={"center"} alignItems="center" bg="#AC2B37" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>

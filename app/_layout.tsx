@@ -32,7 +32,7 @@ function RootNavigator() {
   }
 
   const closeButton = (
-    <NativeButton link={"/"} iconElement={<ArrowLeft/>} title='Back' w={100}/>
+    <NativeButton link={"/"} iconElement={<ArrowLeft/>} title='Back' w={100} style={{margin: 10}}/>
   )
 
   return (

@@ -99,12 +99,11 @@ export default function TabTwoScreen() {
         <Avatar.Image src="http://picsum.photos/200/300" />
         <Avatar.Fallback />
       </Avatar>
-      <SizableText size={"$8"}>Your Account</SizableText>
+      <SizableText size={"$8"}>{user?.user_metadata?.full_name ?? "Your Account"}</SizableText>
       {/* <Spacer></Spacer> */}
       {user ? (
         <>
           <Form gap={"$4"} onSubmit={() => saveProfile()}>
-            <FormInput title="Name" value={user?.user_metadata?.full_name} disabled/>
             <FormInput title="Email" value={user?.email} disabled/>
             <FormInput title="Preferred Name" value={preferredName} onChangeText={setPreferredName}/>
             <FormInput title="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber}/>
