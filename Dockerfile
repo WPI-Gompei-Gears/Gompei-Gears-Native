@@ -2,6 +2,11 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
+# Pull the bun binary from the official image so installs use bun.lock
+# (the lockfile actually kept up to date by `bun expo install`), while
+# the rest of the build still runs under node.
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+
 # Accept build arg and expose it as env var for the build step
 ARG EXPO_PUBLIC_SUPABASE_URL
 ARG EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -11,9 +16,8 @@ ENV EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ENV EXPO_PUBLIC_SUPABASE_ANON_KEY=$EXPO_PUBLIC_SUPABASE_ANON_KEY
 
 # Finish building
-COPY package*.json ./
-RUN npm ci
-RUN npm install
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY . .
 RUN npx expo export --platform web
 
