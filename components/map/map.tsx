@@ -1,5 +1,6 @@
-import { AdvancedMarker, APIProvider, Map, Polygon, Polyline } from '@vis.gl/react-google-maps';
+import { AdvancedMarker, APIProvider, Map, Polygon, Polyline, useMap } from '@vis.gl/react-google-maps';
 import { Image } from 'expo-image';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 const PIN_SOURCES: Record<number, string> = {
@@ -10,16 +11,49 @@ const PIN_SOURCES: Record<number, string> = {
   4: require('@/assets/pins/pin4.svg'),
 };
 
+function CenterZoomAnimator({ centerLocation }: { centerLocation?: { latitude: number, longitude: number } }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map || !centerLocation) return
+
+    const center = { lat: centerLocation.latitude, lng: centerLocation.longitude }
+    const startZoom = 3
+    const endZoom = 18
+    const endTilt = 60
+
+    map.setCenter(center)
+    map.setZoom(startZoom)
+    map.setTilt(0)
+
+    let zoom = startZoom
+    const interval = setInterval(() => {
+      zoom += 1
+      map.setZoom(zoom)
+      if (zoom >= endZoom) {
+        clearInterval(interval)
+        map.setTilt(endTilt)
+      }
+    }, 90)
+
+    return () => clearInterval(interval)
+  }, [map, centerLocation?.latitude, centerLocation?.longitude])
+
+  return null
+}
+
 export default function LocalMap({
   APIKey,
   pins,
   routes,
   zones,
+  centerLocation,
 } : {
   APIKey?: string,
   pins?: { name: string, latitude: number, longitude: number, type: number }[]
   routes?: { latitude: number, longitude: number }[][]
   zones?: { name: string, borders: { latitude: number, longitude: number }[]}[]
+  centerLocation?: { latitude: number, longitude: number }
 }) {
 
   const pinMarkers = pins?.map((pin, index) => {
@@ -56,12 +90,13 @@ export default function LocalMap({
       <APIProvider apiKey={APIKey ?? ""}>
         <Map
           style={{flex: 1}}
-          defaultCenter={{lat: 42.2738260, lng: -71.8097721}}
-          defaultZoom={15}
+          defaultCenter={centerLocation ? {lat: centerLocation.latitude, lng: centerLocation.longitude} : {lat: 42.2738260, lng: -71.8097721}}
+          defaultZoom={centerLocation ? 3 : 15}
           gestureHandling='greedy'
           disableDefaultUI
           mapId="DEMO_MAP_ID"
         >
+          <CenterZoomAnimator centerLocation={centerLocation}/>
           {pinMarkers}
           {routeLines}
           {zonePolygons}

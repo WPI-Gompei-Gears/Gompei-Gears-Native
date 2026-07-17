@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useEffect, useRef } from 'react';
 import MapView, { MapPolyline, Marker, Polygon, Polyline } from 'react-native-maps';
 
 const PIN_SOURCES: Record<number, string> = {
@@ -14,12 +15,39 @@ export default function LocalMap({
   pins,
   routes,
   zones,
+  centerLocation,
 } : {
   APIKey?: string,
   pins?: { name: string, latitude: number, longitude: number, type: number }[]
   routes?: { latitude: number, longitude: number }[][]
   zones?: { name: string, borders: { latitude: number, longitude: number }[]}[]
+  centerLocation?: { latitude: number, longitude: number }
 }) {
+  const mapRef = useRef<MapView>(null)
+
+  useEffect(() => {
+    if (!centerLocation) return
+    const zoomTimer = setTimeout(() => {
+      mapRef.current?.animateToRegion({
+        latitude: centerLocation.latitude,
+        longitude: centerLocation.longitude,
+        latitudeDelta: 0.004,
+        longitudeDelta: 0.004,
+      }, 2000)
+    }, 400)
+    const tiltTimer = setTimeout(() => {
+      mapRef.current?.animateCamera({
+        center: centerLocation,
+        pitch: 60,
+        zoom: 19,
+      }, { duration: 1200 })
+    }, 2800)
+    return () => {
+      clearTimeout(zoomTimer)
+      clearTimeout(tiltTimer)
+    }
+  }, [centerLocation?.latitude, centerLocation?.longitude])
+
   const pinMarkers = pins?.map((pin, index) => {
       // const pinImg = require(`../assets/pins/pin${pin.type}.png`)
   
@@ -58,12 +86,12 @@ export default function LocalMap({
     )
   })
 
-  return <MapView style={{ flex: 1 }} 
+  return <MapView ref={mapRef} style={{ flex: 1 }}
     initialRegion={{
-      latitude: 42.2738260, // Central latitude coordinate
-      longitude: -71.8097721, // Central longitude coordinate
-      latitudeDelta: 0.02, // Vertical span (zoom level)
-      longitudeDelta: 0.02, // Horizontal span (zoom level)
+      latitude: centerLocation?.latitude ?? 42.2738260, // Central latitude coordinate
+      longitude: centerLocation?.longitude ?? -71.8097721, // Central longitude coordinate
+      latitudeDelta: centerLocation ? 60 : 0.02, // Vertical span (zoom level)
+      longitudeDelta: centerLocation ? 60 : 0.02, // Horizontal span (zoom level)
     }}
   >
     {pinMarkers}
