@@ -41,11 +41,11 @@ export default function rentPage() {
         return (
             <View justify={"center"} alignItems="center" height="80%">
                 <YStack gap="$4" alignItems="center">
-                    <SizableText size="$8">Open the Mobile App to Start a Rental!</SizableText>
+                    <SizableText size="$8" textAlign="center">Open the Mobile App to Start a Rental!</SizableText>
                     <Image src={require("@/assets/images/appicon240.png").uri} width={"$10"} aspectRatio={1} />
                     <XStack gap="$2">
-                        <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
-                        <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
+                        <Button icon={Apple} bg={"black"} size={"$3"}><SizableText>App Store</SizableText></Button>
+                        <Button icon={Play} bg={"black"} size={"$3"}><SizableText>Play Store</SizableText></Button>
                     </XStack>
                 </YStack>
             </View>

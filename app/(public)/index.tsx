@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/contexts/session';
-import { Button, SizableText, XStack } from 'tamagui';
+import { Button, SizableText, XStack, YStack } from 'tamagui';
 import { Apple, Play } from '@tamagui/lucide-icons-2';
 
 export default function HomeScreen() {
@@ -55,12 +55,14 @@ export default function HomeScreen() {
     <View style={{flex: 1}}>
       {/* <Text style={{marginTop: insets.top}}>{pins[0].name}</Text> */}
       <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins}/>
-      { Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
-        <XStack bg={"white"} borderRadius={"$8"} p="$5" justify={"center"} gap="$4">
+      { false && Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
+        <YStack bg={"white"} borderRadius={"$8"} p="$5" justify={"center"} alignItems='center' gap="$4" $md={{flexDirection: "row"}}>
           <SizableText fontWeight={"bold"} size={"$6"}>Download the app to get started!</SizableText>
-          <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
-          <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
-        </XStack>
+          <XStack gap="$4">
+            <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
+            <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
+          </XStack>
+        </YStack>
       </XStack>}
       <Image style={{position: "absolute", top: insets.top + 10, left: "50%", height: 65, width: 65, transform: "translate(-50%, 0%)"}} source={require("@/assets/images/appicon240.png")}/>
       <View style={{position: "absolute", top: insets.top + 5, right: 25}}>
@@ -70,7 +72,7 @@ export default function HomeScreen() {
         <NativeButton link='/admin' icon={require("@/assets/images/bolt-circle.png")}></NativeButton>
       </View>}
       <View style={{position: "absolute", bottom: 25, left: "50%", transform: "translate(-50%, 0%)"}}>
-        <NativeButton link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60} mobileOnly></NativeButton>
+        <NativeButton link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
       </View>
     </View>
   );

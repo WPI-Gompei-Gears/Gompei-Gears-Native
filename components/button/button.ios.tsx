@@ -14,11 +14,13 @@ export default function NativeButton({
     h,
     iw,
     ih,
+    p,
     link,
     onPress,
     mobileOnly,
     webOnly,
     style,
+    noGlass,
 }: {
     title? : string,
     icon? : ComponentProps<typeof Image>['source'], // allow require(...) or uri string
@@ -27,13 +29,15 @@ export default function NativeButton({
     h? : number,
     iw? : DimensionValue,
     ih? : DimensionValue,
+    p? : DimensionValue,
     link? : Href,
     onPress? : ((event: GestureResponderEvent) => void) | undefined,
     mobileOnly? : boolean,
     webOnly? : boolean,
     style? : StyleProp<ViewStyle>,
+    noGlass? : boolean,
 }) {
-    if (webOnly) return;
+    if (webOnly) {return (<View></View>)};
 
     const styles = StyleSheet.create({
         glass1: {
@@ -43,19 +47,23 @@ export default function NativeButton({
             justifyContent: "center",
             alignItems: "center",
             flexDirection: "row",
-            flexWrap: "nowrap",
         },}
+    )
+
+    const buttonContents = (
+        <XStack flexWrap='nowrap'>
+            {icon ?
+                (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}} />) :
+                iconElement}
+            {((icon || iconElement) && title) && <View style={{width: 10}} />}
+            {title && <SizableText numberOfLines={1} style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
+        </XStack>
     )
 
     const button = (
         <TouchableOpacity activeOpacity={0.8} style={style} onPress={link ? undefined : onPress}>
-            <GlassView style={styles.glass1} isInteractive>
-                {icon ?
-                    (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}} />) :
-                    iconElement}
-                {(icon && title) && <View style={{width: 10}} />}
-                {title && <SizableText flexWrap="nowrap" style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
-            </GlassView>
+            { noGlass ? buttonContents :
+            <GlassView style={styles.glass1} isInteractive>{buttonContents}</GlassView>}
         </TouchableOpacity>
     )
 

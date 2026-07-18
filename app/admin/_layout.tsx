@@ -23,10 +23,6 @@ export default function AdminLayout() {
           <Label>Reports</Label>
           <Icon sf="exclamationmark.octagon.fill" drawable="ic_menu_manage" />
         </NativeTabs.Trigger>
-        <NativeTabs.Trigger name="messaging">
-          <Label>Messaging</Label>
-          <Icon sf="message.fill" drawable="ic_menu_manage" />
-        </NativeTabs.Trigger>
         <NativeTabs.Trigger name="fleet">
           <Label>Fleet</Label>
           <Icon sf="wrench.fill" drawable="ic_menu_manage" />

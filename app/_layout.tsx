@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '@/contexts/session';
 import { Text } from 'tamagui';
 import NativeButton from '@/components/button/button';
-import { ArrowLeft, ArrowLeftCircle, PanelBottomClose } from '@tamagui/lucide-icons-2';
+import { ArrowLeft, ArrowLeftCircle, ChevronLast, ChevronLeft, PanelBottomClose } from '@tamagui/lucide-icons-2';
 
 function RootNavigator() {
   const { isAdmin, isLoading } = useSession();
@@ -32,7 +32,7 @@ function RootNavigator() {
   }
 
   const closeButton = (
-    <NativeButton link={"/"} iconElement={<ArrowLeft/>} title='Back' w={100} style={{margin: 10}}/>
+    <NativeButton link={"/"} noGlass iconElement={<ChevronLeft/>} p={7.5} title='Back' w={100} style={{margin: 10}}/>
   )
 
   return (
@@ -43,7 +43,7 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal'}}/>
       <Stack.Screen name="bike/[id]" options={{ presentation: 'modal', headerShown: false }} />
-      <Stack.Screen name="rent/[id]" options={{ title: 'Rent Bike', headerLeft: () => closeButton }} />
+      <Stack.Screen name="rent/[id]" options={{ title: 'Rent Bike', headerLeft: () => closeButton, headerTitleAlign: 'center' }} />
     </Stack>
   );
 }
