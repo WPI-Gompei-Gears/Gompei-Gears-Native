@@ -51,12 +51,11 @@ export default function NativeButton({
     )
 
     const buttonContents = (
-        <XStack flexWrap='nowrap'>
+        <XStack flexWrap='nowrap' alignItems='center' gap={"$3"}>
             {icon ?
                 (<Image source={icon} style={{width: (iw ?? (h ?? 40)), height: ih ?? h ?? 40}} />) :
                 iconElement}
-            {((icon || iconElement) && title) && <View style={{width: 10}} />}
-            {title && <SizableText numberOfLines={1} style={{fontSize: h ? h/2.5 : 20}}>{title}</SizableText>}
+            {title && <SizableText numberOfLines={1} style={{fontSize: h ? h/2.5 : 20, lineHeight: (h ? h/2.5 : 20) * 1.35}}>{title}</SizableText>}
         </XStack>
     )
 

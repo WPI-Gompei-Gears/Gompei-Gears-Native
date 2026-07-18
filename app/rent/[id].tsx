@@ -1,7 +1,7 @@
 import CheckboxWithLabel from "@/components/checkbox";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Circle, Image, SizableText, Spacer, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Circle, Image, SizableText, Spacer, Text, View, XStack, YStack } from "tamagui";
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams } from "expo-router";
 import { Apple, Bike, Divide, Play } from "@tamagui/lucide-icons-2";
@@ -54,14 +54,22 @@ export default function rentPage() {
         return (
             <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
                 <YStack flex={1} alignItems="center" width={"100%"}>
-                    <View height={"70%"} width={"100%"} style={{borderBottom: "50%"}} overflow="hidden">
+                    <View height={"70%"} width={"100%"} borderBottomLeftRadius={200} borderBottomRightRadius={200} overflow="hidden">
                         <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
                     </View>
-                    <Circle width={"$19"} justify={"center"} alignItems="center" bg="#AC2B37" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
-                        <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike>
-                        <SizableText size="$8" color="white" fontWeight={"bold"}>Renting {id}</SizableText>
-                        <Spacer/>
-                    </Circle>
+                    <YStack width={"$19"} justify={"center"} alignItems="center" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
+                        {/* <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike> */}
+                        <Image
+                        position="absolute"
+                        objectFit="contain"
+                        width={300}
+                        height={300}
+                        src={require("@/assets/images/app-icon-rent.png")}
+                        />
+                        <Spacer height={"$3"}/>
+                        <SizableText size="$8" color="white" fontWeight={"bold"}>Renting</SizableText>
+                        <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
+                    </YStack>
                 </YStack>
                 <AcceptSlider onAccept={() => {}} label="Slide to Start"/>
             </YStack>
@@ -78,7 +86,7 @@ export default function rentPage() {
                     />
                 </View>
                 <SizableText textAlign="center">Please Review the WPI Rental Agreement</SizableText>
-                <XStack height="10%" justify={"space-between"} alignItems="center">
+                <XStack height="10%" px="$2" justify={"space-between"} alignItems="center">
                     <CheckboxWithLabel size="$5" label="I Agree" onCheckedChange={(value) => {if (value != "indeterminate") setCheck(value)}}/>
                     <Button onPress={() => {setAgreed(true)}} disabled={!checkOn} opacity={checkOn ? 1:0.5}><Text>Continue</Text></Button>
                 </XStack>

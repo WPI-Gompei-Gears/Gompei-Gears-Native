@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Fonts } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { useEffect, useState } from 'react';
-import { AnimatePresence, Avatar, Button, Form, Input, ScrollView, SizableText, Spacer, Spinner, YStack } from 'tamagui';
+import { AnimatePresence, Avatar, Button, Form, H5, Input, ScrollView, SizableText, Spacer, Spinner, Tabs, View, XStack, YStack } from 'tamagui';
 import FormInput from '@/components/forminput';
 import * as WebBrowser from 'expo-web-browser';
 import {makeRedirectUri} from 'expo-auth-session';
@@ -11,6 +11,9 @@ import { useSession } from '@/contexts/session';
 import { BriefcaseConveyorBelt, PanelBottomClose } from '@tamagui/lucide-icons-2';
 import { router } from 'expo-router';
 import NativeButton from '@/components/button/button';
+import WebView from 'react-native-webview';
+import CheckboxWithLabel from '@/components/checkbox';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const redirectTo = makeRedirectUri({ path: '/modal/account' });
 
@@ -63,6 +66,8 @@ export default function TabTwoScreen() {
   const [preferredName, setPreferredName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
 
+  const insets = useSafeAreaInsets()
+
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -94,50 +99,79 @@ export default function TabTwoScreen() {
   }
 
   return (
-    <YStack items="center" gap={"$4"} mt="$6">
-      <Avatar circular size="$6">
-        <Avatar.Image src="http://picsum.photos/200/300" />
-        <Avatar.Fallback />
-      </Avatar>
-      <SizableText size={"$8"}>{user?.user_metadata?.full_name ?? "Your Account"}</SizableText>
-      {/* <Spacer></Spacer> */}
-      {user ? (
-        <>
-          <Form gap={"$4"} onSubmit={() => saveProfile()}>
-            <FormInput title="Email" value={user?.email} disabled/>
-            <FormInput title="Preferred Name" value={preferredName} onChangeText={setPreferredName}/>
-            <FormInput title="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber}/>
-            <Form.Trigger asChild>
-              <Button mx="5%">
-                Save
-                <AnimatePresence>
-                  {submitting ? (
-                    <Spinner
-                      transition="bouncy"
-                      enterStyle={{ opacity: 0 }}
-                      alignSelf="center"
-                      key="spinner"
-                      color={"white"}
-                      ml="$2"
-                      width={8}
-                    />
-                  ) : null}
-                </AnimatePresence>
-              </Button>
-            </Form.Trigger>
-          </Form>
-          <Button onPress={() => supabase.auth.signOut()}>Log Out</Button>
-        </>
-      ) : process.env.EXPO_PUBLIC_IS_DEVELOPMENT_ENV == "true" ? (
-          <>
-            <Button onPress={() => signInAsDevAccount('user')}>Login as User</Button>
-            <Button onPress={() => signInAsDevAccount('admin')}>Login as Admin</Button>
-          </>
-        ) : (
-          <Button onPress={signInWithAzure}>Login</Button>
-        )
-      }
-    </YStack>
+    <Tabs defaultValue="account" flex={1}>
+      <Tabs.List justify='center' mt={"$4"} elevation={"$2"}>
+        <Tabs.Tab value="account">
+          <SizableText>Account</SizableText>
+        </Tabs.Tab>
+        <Tabs.Tab value="agreement">
+          <SizableText>Agreement</SizableText>
+        </Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Content value="account">
+        <YStack items="center" gap={"$4"} mt="$6">
+          <Avatar circular size="$6">
+            <Avatar.Image src="http://picsum.photos/200/300" />
+            <Avatar.Fallback />
+          </Avatar>
+          <SizableText size={"$8"}>{user?.user_metadata?.full_name ?? "Your Account"}</SizableText>
+          {/* <Spacer></Spacer> */}
+          {user ? (
+            <>
+              <Form gap={"$4"} onSubmit={() => saveProfile()}>
+                <FormInput title="Email" value={user?.email} disabled/>
+                <FormInput title="Preferred Name" value={preferredName} onChangeText={setPreferredName}/>
+                <FormInput title="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber}/>
+                <Form.Trigger asChild>
+                  <Button mx="5%">
+                    Save
+                    <AnimatePresence>
+                      {submitting ? (
+                        <Spinner
+                          transition="bouncy"
+                          enterStyle={{ opacity: 0 }}
+                          alignSelf="center"
+                          key="spinner"
+                          color={"white"}
+                          ml="$2"
+                          width={8}
+                        />
+                      ) : null}
+                    </AnimatePresence>
+                  </Button>
+                </Form.Trigger>
+              </Form>
+              <Button onPress={() => supabase.auth.signOut()}>Log Out</Button>
+            </>
+          ) : process.env.EXPO_PUBLIC_IS_DEVELOPMENT_ENV == "true" ? (
+              <>
+                <Button onPress={() => signInAsDevAccount('user')}>Login as User</Button>
+                <Button onPress={() => signInAsDevAccount('admin')}>Login as Admin</Button>
+              </>
+            ) : (
+              <Button onPress={signInWithAzure}>Login</Button>
+            )
+          }
+        </YStack>
+      </Tabs.Content>
+      <Tabs.Content value="agreement" flex={1}>
+        <YStack flex={1} mb={insets.bottom} p="$4" width="100%" gap="$3">
+            <View flex={1} bg="gray" borderRadius={"$5"} overflow="hidden">
+                <WebView
+                    scalesPageToFit={true}
+                    scrollEnabled={true}
+                    style={{flex: 1}}
+                    source={{uri: "https://drive.google.com/file/d/147I0zCKz7B8zP5tZSdI2vs4DXY2YYm6z/preview"}}
+                />
+            </View>
+            <SizableText textAlign="center">WPI Rental Agreement</SizableText>
+            <XStack height="10%" px="$2" alignItems="center" justify={"center"}>
+              <CheckboxWithLabel size="$5" label="I Agree"/>
+            </XStack>
+        </YStack>
+      </Tabs.Content>
+    </Tabs>
   );
 }
 

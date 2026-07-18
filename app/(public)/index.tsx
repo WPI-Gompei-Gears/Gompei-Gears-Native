@@ -55,7 +55,7 @@ export default function HomeScreen() {
     <View style={{flex: 1}}>
       {/* <Text style={{marginTop: insets.top}}>{pins[0].name}</Text> */}
       <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins}/>
-      { false && Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
+      { Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
         <YStack bg={"white"} borderRadius={"$8"} p="$5" justify={"center"} alignItems='center' gap="$4" $md={{flexDirection: "row"}}>
           <SizableText fontWeight={"bold"} size={"$6"}>Download the app to get started!</SizableText>
           <XStack gap="$4">
