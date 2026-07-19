@@ -99,8 +99,8 @@ export default function TabTwoScreen() {
   }
 
   return (
-    <Tabs defaultValue="account" flex={1}>
-      <Tabs.List justify='center' mt={"$4"} elevation={"$2"}>
+    <Tabs defaultValue="account" flex={1} alignItems="center">
+      <Tabs.List justify='center' mt={"$4"} elevation={"$2"} width={"max-content"}>
         <Tabs.Tab value="account">
           <SizableText>Account</SizableText>
         </Tabs.Tab>

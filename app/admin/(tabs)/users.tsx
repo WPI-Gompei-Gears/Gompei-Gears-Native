@@ -4,10 +4,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import TitleBar from '@/components/titlebar';
 
-export default function AdminFleet() {
+export default function AdminUsers() {
   return (
     <ThemedView style={styles.container}>
-      <TitleBar title='Fleet' returnLink={"/(public)"}></TitleBar>
+      <TitleBar title='Users' returnLink={"/(public)"}></TitleBar>
     </ThemedView>
   );
 }
@@ -19,3 +19,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
 });
+

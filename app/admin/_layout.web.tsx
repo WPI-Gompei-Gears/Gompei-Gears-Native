@@ -11,11 +11,11 @@ import {
 } from '@tamagui/lucide-icons-2';
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Rides', icon: ShipWheel },
-  { href: '/admin/assets', label: 'Assets', icon: Home },
-  { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/reports', label: 'Reports', icon: AlertOctagon },
-  { href: '/admin/fleet', label: 'Fleet', icon: Wrench },
+  { href: '/admin/(tabs)', label: 'Rides', icon: ShipWheel },
+  { href: '/admin/(tabs)/assets', label: 'Assets', icon: Home },
+  { href: '/admin/(tabs)/users', label: 'Users', icon: Users },
+  { href: '/admin/(tabs)/reports', label: 'Reports', icon: AlertOctagon },
+  { href: '/admin/(tabs)/fleet', label: 'Fleet', icon: Wrench },
 ] as const;
 
 export default function AdminLayoutWeb() {
@@ -39,7 +39,7 @@ export default function AdminLayoutWeb() {
         </SizableText>
 
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+          const active = href === '/admin/(tabs)' ? pathname === '/admin' : pathname.startsWith(href);
 
           return (
             <Link key={href} href={href} asChild>

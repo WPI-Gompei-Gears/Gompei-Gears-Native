@@ -72,7 +72,7 @@ export default function HomeScreen() {
         <NativeButton link='/admin' icon={require("@/assets/images/bolt-circle.png")}></NativeButton>
       </View>}
       <View style={{position: "absolute", bottom: 25, left: "50%", transform: "translate(-50%, 0%)"}}>
-        <NativeButton link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
+        <NativeButton mobileOnly link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
       </View>
     </View>
   );
