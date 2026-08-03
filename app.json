@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.gompeigears",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.gompeigears",
