@@ -1,0 +1,67 @@
+name: Build unsigned iOS .ipa (for Sideloadly)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install JS dependencies
+        run: bun install
+
+      - name: Prebuild iOS native project
+        run: npx expo prebuild --platform ios
+
+      - name: Locate workspace and scheme
+        id: xcode
+        run: |
+          WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -n1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          echo "workspace=$WORKSPACE" >> "$GITHUB_OUTPUT"
+          echo "scheme=$SCHEME" >> "$GITHUB_OUTPUT"
+          echo "Workspace: $WORKSPACE / Scheme: $SCHEME"
+
+      - name: Build unsigned .app
+        run: |
+          xcodebuild \
+            -workspace "${{ steps.xcode.outputs.workspace }}" \
+            -scheme "${{ steps.xcode.outputs.scheme }}" \
+            -configuration Debug \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          APP_PATH=$(find build/Build/Products -maxdepth 1 -name "*.app" | head -n1)
+          APP_NAME=$(basename "$APP_PATH" .app)
+          mkdir -p Payload
+          cp -R "$APP_PATH" "Payload/"
+          zip -r -y "${APP_NAME}-unsigned.ipa" Payload
+          mkdir -p out
+          mv "${APP_NAME}-unsigned.ipa" out/
+
+      - name: Upload .ipa artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-ipa
+          path: out/*.ipa
+          retention-days: 14
