@@ -51,7 +51,12 @@ jobs:
 
       - name: Package .ipa
         run: |
-          APP_PATH=$(find build/Build/Products -maxdepth 1 -name "*.app" | head -n1)
+          APP_PATH=$(find build/Build/Products -maxdepth 2 -name "*.app" | head -n1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found under build/Build/Products" >&2
+            find build/Build/Products
+            exit 1
+          fi
           APP_NAME=$(basename "$APP_PATH" .app)
           mkdir -p Payload
           cp -R "$APP_PATH" "Payload/"
