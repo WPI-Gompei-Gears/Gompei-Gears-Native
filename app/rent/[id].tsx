@@ -10,6 +10,7 @@ import LocalMap from "@/components/map/map";
 import { supabase } from "@/lib/supabase";
 import { Alert, Platform } from "react-native";
 import { useSession } from "@/contexts/session";
+// import { setLockStatus } from "@/components/lockHandler";
 
 export default function rentPage() {
     const [agreed, setAgreed] = useState(false)
@@ -132,30 +133,37 @@ export default function rentPage() {
                     body={"To stay safe while riding, the Rubin Campus Center offers free helmet rentals with your WPI ID. Have Fun!"}
                     image={require("@/assets/images/instructions/bikelock.png")}
                 />
-            case 4:
-                return (
-                    <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
-                        <YStack flex={1} alignItems="center" width={"100%"}>
-                            <View height={"70%"} width={"100%"} borderBottomLeftRadius={200} borderBottomRightRadius={200} overflow="hidden">
-                                <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
-                            </View>
-                            <YStack width={"$19"} justify={"center"} alignItems="center" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
-                                {/* <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike> */}
-                                <Image
-                                position="absolute"
-                                objectFit="contain"
-                                width={300}
-                                height={300}
-                                src={require("@/assets/images/app-icon-rent.png")}
-                                />
-                                <Spacer height={"$3"}/>
-                                <SizableText size="$8" color="white" fontWeight={"bold"}>Renting</SizableText>
-                                <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
-                            </YStack>
-                        </YStack>
-                        <AcceptSlider onAccept={startRental} label={starting ? "Starting…" : "Slide to Start"}/>
-                    </YStack>
-                )
+            // case 4:
+            //     return (
+            //         <View>
+            //             <Button onPress={() => setLockStatus("123", true)}>Lock</Button>
+            //             <Button onPress={() => setLockStatus("123", false)}>Unlock</Button>
+            //         </View>
+            //     )
+            // case 5:
+            //     return (
+            //         <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
+            //             <YStack flex={1} alignItems="center" width={"100%"}>
+            //                 <View height={"70%"} width={"100%"} borderBottomLeftRadius={200} borderBottomRightRadius={200} overflow="hidden">
+            //                     <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
+            //                 </View>
+            //                 <YStack width={"$19"} justify={"center"} alignItems="center" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
+            //                     {/* <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike> */}
+            //                     <Image
+            //                     position="absolute"
+            //                     objectFit="contain"
+            //                     width={300}
+            //                     height={300}
+            //                     src={require("@/assets/images/app-icon-rent.png")}
+            //                     />
+            //                     <Spacer height={"$3"}/>
+            //                     <SizableText size="$8" color="white" fontWeight={"bold"}>Renting</SizableText>
+            //                     <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
+            //                 </YStack>
+            //             </YStack>
+            //             <AcceptSlider onAccept={startRental} label={starting ? "Starting…" : "Slide to Start"}/>
+            //         </YStack>
+            //     )
         }
     } else {
         return (
