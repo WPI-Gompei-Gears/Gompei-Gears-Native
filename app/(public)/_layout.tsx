@@ -4,6 +4,7 @@ export default function PublicLayout() {
   return (
     <Stack screenOptions={{ presentation: 'modal' }}>
       <Stack.Screen name="index" options={{ presentation: 'card', headerShown: false }} />
+      <Stack.Screen name="renting" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ headerShown: false }} />
       <Stack.Screen
         name="qrcode"

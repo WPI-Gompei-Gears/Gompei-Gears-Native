@@ -12,7 +12,8 @@ import { Button, SizableText, XStack, YStack } from 'tamagui';
 import { Apple, Play } from '@tamagui/lucide-icons-2';
 
 export default function HomeScreen() {
-  const { isAdmin } = useSession()
+  const { session, isAdmin } = useSession()
+  const user = session?.user
 
   const insets = useSafeAreaInsets();
 
@@ -72,7 +73,7 @@ export default function HomeScreen() {
         <NativeButton link='/admin' icon={require("@/assets/images/bolt-circle.png")}></NativeButton>
       </View>}
       <View style={{position: "absolute", bottom: 25, left: "50%", transform: "translate(-50%, 0%)"}}>
-        <NativeButton mobileOnly link='/(public)/qrcode' title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
+        <NativeButton mobileOnly link={user ? '/(public)/qrcode' : "/(public)/modal/account"} title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
       </View>
     </View>
   );

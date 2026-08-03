@@ -1,22 +1,53 @@
 import CheckboxWithLabel from "@/components/checkbox";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, Circle, Image, SizableText, Spacer, Text, View, XStack, YStack } from "tamagui";
+import { Button, Card, Circle, H1, Image, SizableText, Spacer, Spinner, Text, View, XStack, YStack } from "tamagui";
 import { WebView } from 'react-native-webview';
 import { useLocalSearchParams } from "expo-router";
-import { Apple, Bike, Divide, Play } from "@tamagui/lucide-icons-2";
+import { Apple, ArrowRight, Bike, Divide, Play } from "@tamagui/lucide-icons-2";
 import AcceptSlider from "@/components/acceptslider";
 import LocalMap from "@/components/map/map";
 import { supabase } from "@/lib/supabase";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
+import { useSession } from "@/contexts/session";
 
 export default function rentPage() {
     const [agreed, setAgreed] = useState(false)
-    const [checkOn, setCheck] = useState(false)
     const insets = useSafeAreaInsets()
     const { id } = useLocalSearchParams<{ id: string }>();
+    const { session, refreshActiveRental, hasAgreedToTerms, agreeToTerms, isLoading } = useSession();
+    const [boxState, setBoxState] = useState(hasAgreedToTerms)
 
     const [bicycles, setBicycles] = useState<any[]>([])
+    const [starting, setStarting] = useState(false)
+    const [rentalPage, setRentalPage] = useState(0)
+
+    useEffect(() => {
+        setAgreed(hasAgreedToTerms)
+    }, [hasAgreedToTerms])
+
+    function InstructionPage({
+        title,
+        body,
+        image,
+    } : {
+        title: String,
+        body: String,
+        image: any,
+    }) {
+        const insets = useSafeAreaInsets()
+
+        return (
+            <View flex={1} margin={"$4"} mb={insets.bottom} alignItems="center">
+                <YStack flex={1} alignItems="center" gap={"$5"}>
+                    <Image src={image} aspectRatio={1} width={"80%"}></Image>
+                    <H1>{title}</H1>
+                    <SizableText size="$5" opacity={0.8}>{body}</SizableText>
+                </YStack>
+                <Button width={"100%"} iconAfter={ArrowRight} onPress={() => setRentalPage(rentalPage + 1)}>Continue</Button>
+            </View>
+        )
+    }
 
     useEffect(() => {
         async function getInstruments() {
@@ -25,6 +56,25 @@ export default function rentPage() {
         }
         getInstruments()
     }, [id])
+
+    async function startRental() {
+        const bicycle = bicycles[0]
+        if (!session?.user || !bicycle || starting) return
+
+        setStarting(true)
+        const { error } = await supabase.from('rentals').insert({
+            user_id: session.user.id,
+            bicycle_id: bicycle.id,
+        })
+        setStarting(false)
+
+        if (error) {
+            Alert.alert('Unable to start rental', error.message)
+            return
+        }
+
+        await refreshActiveRental()
+    }
 
     const pins = bicycles
     .filter((bicycle: any) => bicycle.lat != null && bicycle.lng != null)
@@ -50,30 +100,63 @@ export default function rentPage() {
                 </YStack>
             </View>
         )
-    } else if(agreed) {
+    } else if(isLoading) {
         return (
-            <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
-                <YStack flex={1} alignItems="center" width={"100%"}>
-                    <View height={"70%"} width={"100%"} borderBottomLeftRadius={200} borderBottomRightRadius={200} overflow="hidden">
-                        <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
-                    </View>
-                    <YStack width={"$19"} justify={"center"} alignItems="center" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
-                        {/* <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike> */}
-                        <Image
-                        position="absolute"
-                        objectFit="contain"
-                        width={300}
-                        height={300}
-                        src={require("@/assets/images/app-icon-rent.png")}
-                        />
-                        <Spacer height={"$3"}/>
-                        <SizableText size="$8" color="white" fontWeight={"bold"}>Renting</SizableText>
-                        <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
-                    </YStack>
-                </YStack>
-                <AcceptSlider onAccept={() => {}} label="Slide to Start"/>
-            </YStack>
+            <View flex={1} justify={"center"} alignItems="center">
+                <Spinner size="large" />
+            </View>
         )
+    } else if(agreed) {
+        switch(rentalPage) {
+            case 0:
+                return <InstructionPage
+                    title={"Ride Up To 8 Hours"}
+                    body={"Take out Gompei's Gears bike for up to 8 hours, 100% free! Just make sure you press \"End Ride\" after your time is up."}
+                    image={require("@/assets/images/instructions/bikelock.png")}
+                />
+            case 1:
+                return <InstructionPage
+                    title={"Return to Any Station"}
+                    body={"Any green bike rack on the WPI campus is for Gompei's Gears. Make sure you return to one to end your ride! Can't find one? No problem, they're visible on this app after your rental has started."}
+                    image={require("@/assets/images/instructions/bikelock.png")}
+                />
+            case 2:
+                return <InstructionPage
+                    title={"Make Sure to Lock Up"}
+                    body={"Run the included chain securely through the rack loop, and close the lock through the rear wheel to ensure the bike is secure. Stolen bikes will be the financial responsibility of the last renter, unless further evidence is present."}
+                    image={require("@/assets/images/instructions/bikelock.png")}
+                />
+            case 3:
+                return <InstructionPage
+                    title={"Wear a Helmet and Have Fun!"}
+                    body={"To stay safe while riding, the Rubin Campus Center offers free helmet rentals with your WPI ID. Have Fun!"}
+                    image={require("@/assets/images/instructions/bikelock.png")}
+                />
+            case 4:
+                return (
+                    <YStack alignItems="center" flex={1} mb={insets.bottom + 50} width={"100%"}>
+                        <YStack flex={1} alignItems="center" width={"100%"}>
+                            <View height={"70%"} width={"100%"} borderBottomLeftRadius={200} borderBottomRightRadius={200} overflow="hidden">
+                                <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins} centerLocation={centerLocation}/>
+                            </View>
+                            <YStack width={"$19"} justify={"center"} alignItems="center" aspectRatio={1} transform={"translateY(-200%)"} shadowRadius={"$2"}>
+                                {/* <Bike color={"white"} size={"$10"} strokeWidth={1}></Bike> */}
+                                <Image
+                                position="absolute"
+                                objectFit="contain"
+                                width={300}
+                                height={300}
+                                src={require("@/assets/images/app-icon-rent.png")}
+                                />
+                                <Spacer height={"$3"}/>
+                                <SizableText size="$8" color="white" fontWeight={"bold"}>Renting</SizableText>
+                                <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
+                            </YStack>
+                        </YStack>
+                        <AcceptSlider onAccept={startRental} label={starting ? "Starting…" : "Slide to Start"}/>
+                    </YStack>
+                )
+        }
     } else {
         return (
             <YStack flex={1} mb={insets.bottom} p="$4" width="100%" gap="$3">
@@ -87,8 +170,8 @@ export default function rentPage() {
                 </View>
                 <SizableText textAlign="center">Please Review the WPI Rental Agreement</SizableText>
                 <XStack height="10%" px="$2" justify={"space-between"} alignItems="center">
-                    <CheckboxWithLabel size="$5" label="I Agree" onCheckedChange={(value) => {if (value != "indeterminate") setCheck(value)}}/>
-                    <Button onPress={() => {setAgreed(true)}} disabled={!checkOn} opacity={checkOn ? 1:0.5}><Text>Continue</Text></Button>
+                    <CheckboxWithLabel size="$5" label="I Agree" checked={boxState} onCheckedChange={(value) => {if (value != "indeterminate") setBoxState(value)}}/>
+                    <Button onPress={() => {agreeToTerms(boxState)}} disabled={!boxState} opacity={boxState ? 1:0.5}><Text>Continue</Text></Button>
                 </XStack>
             </YStack>
         )

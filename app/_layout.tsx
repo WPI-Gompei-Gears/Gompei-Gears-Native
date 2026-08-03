@@ -14,7 +14,7 @@ import NativeButton from '@/components/button/button';
 import { ArrowLeft, ArrowLeftCircle, ChevronLast, ChevronLeft, PanelBottomClose } from '@tamagui/lucide-icons-2';
 
 function RootNavigator() {
-  const { isAdmin, isLoading } = useSession();
+  const { isAdmin, isLoading, activeRental } = useSession();
   const segments = useSegments();
 
   // If we're resolving a direct load of (or refresh on) an admin route,
@@ -29,6 +29,12 @@ function RootNavigator() {
 
   if(!isAdmin && segments[0] === 'admin') {
     return (<Redirect href="/"/>)
+  }
+
+  // A user with an open rental (no end_time yet) should always land back
+  // on that bike's rent screen instead of browsing the rest of the app.
+  if (!isLoading && activeRental && segments[1] !== 'renting') {
+    return <Redirect href={`/renting`} />
   }
 
   const closeButton = (

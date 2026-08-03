@@ -61,7 +61,7 @@ async function signInAsDevAccount(role: 'user' | 'admin') {
 }
 
 export default function TabTwoScreen() {
-  const { session } = useSession()
+  const { session, hasAgreedToTerms } = useSession()
   const user = session?.user
   const [preferredName, setPreferredName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -104,15 +104,15 @@ export default function TabTwoScreen() {
         <Tabs.Tab value="account">
           <SizableText>Account</SizableText>
         </Tabs.Tab>
-        <Tabs.Tab value="agreement">
+        {user && <Tabs.Tab value="agreement">
           <SizableText>Agreement</SizableText>
-        </Tabs.Tab>
+        </Tabs.Tab>}
       </Tabs.List>
 
       <Tabs.Content value="account">
         <YStack items="center" gap={"$4"} mt="$6">
           <Avatar circular size="$6">
-            <Avatar.Image src="http://picsum.photos/200/300" />
+            <Avatar.Image src="https://picsum.photos/200/300" />
             <Avatar.Fallback />
           </Avatar>
           <SizableText size={"$8"}>{user?.user_metadata?.full_name ?? "Your Account"}</SizableText>
@@ -155,7 +155,7 @@ export default function TabTwoScreen() {
           }
         </YStack>
       </Tabs.Content>
-      <Tabs.Content value="agreement" flex={1}>
+      <Tabs.Content value="agreement" flex={1} width={"100%"}>
         <YStack flex={1} mb={insets.bottom} p="$4" width="100%" gap="$3">
             <View flex={1} bg="gray" borderRadius={"$5"} overflow="hidden">
                 <WebView
@@ -167,7 +167,12 @@ export default function TabTwoScreen() {
             </View>
             <SizableText textAlign="center">WPI Rental Agreement</SizableText>
             <XStack height="10%" px="$2" alignItems="center" justify={"center"}>
-              <CheckboxWithLabel size="$5" label="I Agree"/>
+              <CheckboxWithLabel
+                size="$5"
+                label="I Agree"
+                checked={hasAgreedToTerms}
+                onPress={() => {}}
+              />
             </XStack>
         </YStack>
       </Tabs.Content>
