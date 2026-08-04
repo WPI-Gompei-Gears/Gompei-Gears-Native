@@ -1,6 +1,5 @@
-import LockHandler from "@/components/lock-handler";
 import LocalMap from "@/components/map/map";
-// import { useLock } from "@/contexts/lock";
+import { useLock } from "@/hooks/use-lock";
 import { useSession } from "@/contexts/session";
 import { supabase } from "@/lib/supabase";
 import { Check, Lock, LockOpen, MessageCircleQuestion, Pause } from "@tamagui/lucide-icons-2";
@@ -20,13 +19,11 @@ function formatElapsed(startTime?: string) {
 
 export default function RentingPage() {
     const insets = useSafeAreaInsets();
-    // const { lockState, setLockStatus } = useLock();
     const { activeRental, refreshActiveRental } = useSession();
     const [ending, setEnding] = useState(false);
     const [elapsed, setElapsed] = useState(() => formatElapsed(activeRental?.startTime));
 
-    const [lockStatus, setLockStatus] = useState<String | null>(null)
-    const [lockSet, setLockSet] = useState<boolean | null>(null)
+    const { status: lockStatus, lock, unlock } = useLock('AXA-Lock');
 
     useEffect(() => {
         setElapsed(formatElapsed(activeRental?.startTime));
@@ -81,7 +78,7 @@ export default function RentingPage() {
                 <SizableText size="$5" fontWeight="700" mb="$4">Ride Options</SizableText>
                 <XStack justify="space-around">
                     <YStack items="center" gap="$2" opacity={lockStatus == null ? 0.4 : 1}>
-                        <Button circular size="$6" bg="$background" onPress={lockStatus == "Locked" ? () => {setLockSet(false)} : () => {setLockSet(true)}} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
+                        <Button circular size="$6" bg="$background" onPress={lockStatus == "Locked" ? unlock : lock} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
                         <SizableText size="$2">{lockStatus == "Locked" ? "Unlock Bike" : lockStatus == "Unlocked" ? "Lock Bike" : "Disconnected"}</SizableText>
                     </YStack>
 
@@ -106,7 +103,6 @@ export default function RentingPage() {
                     </YStack>
                 </XStack>
             </Card>
-            <LockHandler statusSetter={setLockStatus} desiredState={lockSet} desiredStateSetter={setLockSet}/>
         </YStack>
     );
 }

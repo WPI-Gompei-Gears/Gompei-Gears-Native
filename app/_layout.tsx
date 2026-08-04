@@ -12,18 +12,15 @@ import { SessionProvider, useSession } from '@/contexts/session';
 import { Text } from 'tamagui';
 import NativeButton from '@/components/button/button';
 import { ArrowLeft, ArrowLeftCircle, ChevronLast, ChevronLeft, PanelBottomClose } from '@tamagui/lucide-icons-2';
-import LockHandler from '@/components/lock-handler';
 
 function RootNavigator() {
   const { isAdmin, isLoading, activeRental } = useSession();
   const segments = useSegments();
 
-  // If we're resolving a direct load of (or refresh on) an admin route,
-  // hold off rendering until we actually know isAdmin — otherwise the
+  // Hold off rendering until we actually know isAdmin — otherwise the
   // navigator excludes "admin" from its screens while loading and
   // immediately (and irreversibly) redirects away before the fetch
-  // finishing could make it available. Other routes render immediately
-  // regardless of loading state.
+  // finishing could make it available.
   if (isLoading && segments[0] === 'admin') {
     return <View bg="white"></View>;
   }
