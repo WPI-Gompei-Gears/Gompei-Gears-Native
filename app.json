@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "gompei-gears-native",
+    "name": "Gompei's Gears",
     "slug": "gompei-gears-native",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icon/icon.png",
     "scheme": "gompeigears",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
