@@ -23,11 +23,15 @@ export default function RentPage() {
     const [starting, setStarting] = useState(false)
     const [rentalPage, setRentalPage] = useState(0)
     
-    const { status: lockStatus, lock, unlock } = useLock('AXA-Lock');
+    const { unlock, busy: lockBusy, error: lockError } = useLock('AXA-Lock');
 
     useEffect(() => {
         setAgreed(hasAgreedToTerms)
     }, [hasAgreedToTerms])
+
+    useEffect(() => {
+        if (lockError) Alert.alert("Lock error", lockError)
+    }, [lockError])
 
     function InstructionPage({
         title,
@@ -62,7 +66,7 @@ export default function RentPage() {
 
     async function startRental() {
         const bicycle = bicycles[0]
-        if (!session?.user || !bicycle || starting) return
+        if (!session?.user || !bicycle || starting || lockBusy) return
 
         setStarting(true)
 
@@ -77,12 +81,14 @@ export default function RentPage() {
             return
         }
 
-        unlock()
-        await lockStatus == "Unlocked"
+        const unlocked = await unlock()
+        await refreshActiveRental()
+        if (!unlocked) {
+            setStarting(false)
+            return
+        }
 
         setStarting(false)
-        
-        await refreshActiveRental()
     }
 
     const pins = bicycles
@@ -162,16 +168,13 @@ export default function RentPage() {
                                 <SizableText size="$12" color="white" fontWeight={"bold"}>{id}</SizableText>
                             </YStack>
                         </YStack>
-                        {/* {starting ? 
+                        {starting ? 
                             <YStack gap={"$4"}>
                                 <Spinner/>
-                                {lockState == "Unknown" ? 
-                                    <SizableText fontWeight={900} opacity={0.8}>Searching for lock...</SizableText> :
-                                    <SizableText fontWeight={900} opacity={0.8}>Unlocking...</SizableText>
-                                }
-                            </YStack> :  */}
+                                <SizableText fontWeight={700} opacity={0.8}>Connecting to lock...</SizableText>
+                            </YStack> : 
                             <AcceptSlider onAccept={startRental} label={starting ? "Starting…" : "Slide to Start"}/>
-                        {/* } */}
+                        }
                     </YStack>
                 )
         }

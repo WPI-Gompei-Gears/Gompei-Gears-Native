@@ -8,119 +8,148 @@ const SERVICE_UUID = '12345678-1234-1234-1234-123456789abc';
 const COMMAND_UUID = '12345678-1234-1234-1234-123456789abd';
 const STATE_UUID = '12345678-1234-1234-1234-123456789abe';
 
-function decodeState(value: string): string | null {
+const CONNECT_TIMEOUT_MS = 15000;
+const CONFIRM_TIMEOUT_MS = 8000;
+
+function decodeState(value: string): 'Locked' | 'Unlocked' | null {
   const decoded = base64.decode(value);
   return decoded.startsWith('L') ? 'Locked' : decoded.startsWith('T') ? 'Unlocked' : null;
 }
 
-// Connects to `deviceName` while the calling component is mounted and
-// disconnects on unmount. Lock state updates come from the device's notify
-// characteristic, so there's no polling once connected.
-export function useLock(deviceName: string) {
-  const [status, setStatus] = useState<string | null>(null);
-  const deviceRef = useRef<Device | null>(null);
-  const statusRef = useRef<string | null>(null);
-  const sendingRef = useRef(false);
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
 
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
+// Scans for `deviceName` and connects, aborting if `signal.cancelled` is set
+// (used to give up cleanly when a timeout fires while the scan is still running).
+function scanAndConnect(deviceName: string, signal: { cancelled: boolean }): Promise<Device> {
+  return new Promise((resolve, reject) => {
+    const stateSub = manager.onStateChange((state) => {
+      if (state !== 'PoweredOn') return;
+      stateSub.remove();
 
-  useEffect(() => {
-    let cancelled = false;
-    let monitorSub: { remove: () => void } | null = null;
-    let disconnectSub: { remove: () => void } | null = null;
+      if (signal.cancelled) {
+        reject(new Error('Cancelled'));
+        return;
+      }
 
-    const startScan = () => {
-      manager.startDeviceScan(null, null, (error, found) => {
-        if (error || cancelled) return;
+      manager.startDeviceScan(null, null, async (error, found) => {
+        if (signal.cancelled) return;
 
-        if (found?.name === deviceName) {
+        if (error) {
           manager.stopDeviceScan();
-          connectToDevice(found);
-        }
-      });
-    };
-
-    const connectToDevice = async (found: Device) => {
-      try {
-        const connected = await found.connect();
-        await connected.discoverAllServicesAndCharacteristics();
-
-        if (cancelled) {
-          connected.cancelConnection();
+          reject(error);
           return;
         }
 
-        deviceRef.current = connected;
+        if (found?.name === deviceName) {
+          manager.stopDeviceScan();
 
-        monitorSub = connected.monitorCharacteristicForService(
-          SERVICE_UUID,
-          STATE_UUID,
-          (error, characteristic) => {
-            if (error || !characteristic?.value) return;
-            setStatus(decodeState(characteristic.value));
+          try {
+            const connected = await found.connect();
+
+            if (signal.cancelled) {
+              connected.cancelConnection();
+              reject(new Error('Cancelled'));
+              return;
+            }
+
+            await connected.discoverAllServicesAndCharacteristics();
+            resolve(connected);
+          } catch (err) {
+            reject(err);
           }
-        );
-
-        disconnectSub = connected.onDisconnected(() => {
-          monitorSub?.remove();
-          disconnectSub?.remove();
-          deviceRef.current = null;
-          setStatus(null);
-          if (!cancelled) startScan();
-        });
-
-        const char = await connected.readCharacteristicForService(SERVICE_UUID, STATE_UUID);
-        if (char?.value) setStatus(decodeState(char.value));
-      } catch (err) {
-        console.error('Lock connect failed:', err);
-        if (!cancelled) startScan();
-      }
-    };
-
-    const stateSub = manager.onStateChange((state) => {
-      if (state !== 'PoweredOn') return;
-      startScan();
+        }
+      });
     }, true);
+  });
+}
 
+// Connects to `deviceName` only for the duration of a lock()/unlock() call.
+// Stays connected until the device's state characteristic actually confirms
+// the requested state (or the confirmation times out), then disconnects.
+export function useLock(deviceName: string) {
+  const [status, setStatus] = useState<'Locked' | 'Unlocked'>('Locked');
+  const [locking, setLocking] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const busyRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      cancelled = true;
-      stateSub.remove();
-      manager.stopDeviceScan();
-      monitorSub?.remove();
-      disconnectSub?.remove();
-      deviceRef.current?.cancelConnection();
-      deviceRef.current = null;
-      setStatus(null);
+      mountedRef.current = false;
     };
-  }, [deviceName]);
-
-  const sendCommand = useCallback(async (cmd: 'LOCK' | 'UNLOCK') => {
-    if (sendingRef.current) return;
-    const device = deviceRef.current;
-    if (!device) return;
-
-    sendingRef.current = true;
-    try {
-      const payload = base64.encode(cmd);
-      await device.writeCharacteristicWithResponseForService(SERVICE_UUID, COMMAND_UUID, payload);
-    } catch (err) {
-      console.error('Lock command failed:', err);
-    } finally {
-      sendingRef.current = false;
-    }
   }, []);
 
-  const lock = useCallback(() => {
-    if (statusRef.current === 'Locked') return;
-    sendCommand('LOCK');
-  }, [sendCommand]);
+  const performAction = useCallback(async (cmd: 'LOCK' | 'UNLOCK'): Promise<boolean> => {
+    if (busyRef.current) return false;
+    busyRef.current = true;
+    setError(null);
+    const desired = cmd === 'LOCK' ? 'Locked' : 'Unlocked';
+    const setActionBusy = cmd === 'LOCK' ? setLocking : setUnlocking;
+    setActionBusy(true);
 
-  const unlock = useCallback(() => {
-    if (statusRef.current === 'Unlocked') return;
-    sendCommand('UNLOCK');
-  }, [sendCommand]);
+    const signal = { cancelled: false };
+    let device: Device | null = null;
+    const monitorSubRef: { current: { remove: () => void } | null } = { current: null };
 
-  return { status, lock, unlock };
+    try {
+      device = await withTimeout(
+        scanAndConnect(deviceName, signal),
+        CONNECT_TIMEOUT_MS,
+        'Could not find the lock'
+      );
+
+      const reachedDesired = new Promise<void>((resolve, reject) => {
+        monitorSubRef.current = device!.monitorCharacteristicForService(
+          SERVICE_UUID,
+          STATE_UUID,
+          (err, characteristic) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            if (characteristic?.value && decodeState(characteristic.value) === desired) {
+              resolve();
+            }
+          }
+        );
+      });
+
+      const current = await device.readCharacteristicForService(SERVICE_UUID, STATE_UUID);
+      const alreadyThere = current?.value ? decodeState(current.value) === desired : false;
+
+      if (!alreadyThere) {
+        const payload = base64.encode(cmd);
+        await device.writeCharacteristicWithResponseForService(SERVICE_UUID, COMMAND_UUID, payload);
+        await withTimeout(reachedDesired, CONFIRM_TIMEOUT_MS, 'Lock did not confirm new state');
+      }
+
+      if (mountedRef.current) setStatus(desired);
+      return true;
+    } catch (err) {
+      if (mountedRef.current) setError(err instanceof Error ? err.message : 'Lock action failed');
+      return false;
+    } finally {
+      signal.cancelled = true;
+      manager.stopDeviceScan();
+      monitorSubRef.current?.remove();
+      device?.cancelConnection();
+      busyRef.current = false;
+      if (mountedRef.current) setActionBusy(false);
+    }
+  }, [deviceName]);
+
+  const lock = useCallback(() => performAction('LOCK'), [performAction]);
+  const unlock = useCallback(() => performAction('UNLOCK'), [performAction]);
+
+  return { status, lock, unlock, locking, unlocking, busy: locking || unlocking, error };
 }

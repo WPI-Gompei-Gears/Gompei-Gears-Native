@@ -7,15 +7,16 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Card, H2, SizableText, Spinner, View, XStack, YStack } from "tamagui";
+import { Button, Card, H2, SizableText, Spinner, View, XStack, YStack, Image } from "tamagui";
 import AcceptSlider from "@/components/acceptslider";
 
 function formatElapsed(startTime?: string) {
     if (!startTime) return "0:00";
     const totalSeconds = Math.max(0, Math.floor((Date.now() - new Date(startTime).getTime()) / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor(totalSeconds / 60) % 60;
     const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${hours > 0 ? (hours + " hours, ") : ""}${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 export default function RentingPage() {
@@ -24,7 +25,7 @@ export default function RentingPage() {
     const [ending, setEnding] = useState(false);
     const [elapsed, setElapsed] = useState(() => formatElapsed(activeRental?.startTime));
 
-    const { status: lockStatus, lock, unlock } = useLock('AXA-Lock');
+    const { status: lockStatus, lock, unlock, locking, unlocking, busy: lockBusy, error: lockError } = useLock('AXA-Lock');
 
     useEffect(() => {
         setElapsed(formatElapsed(activeRental?.startTime));
@@ -32,17 +33,25 @@ export default function RentingPage() {
         return () => clearInterval(interval);
     }, [activeRental?.startTime]);
 
+    useEffect(() => {
+        if (lockError) Alert.alert("Lock error", lockError);
+    }, [lockError]);
+
     const pins = activeRental?.lat != null && activeRental?.lng != null
         ? [{ name: activeRental.bikeLabel, latitude: activeRental.lat, longitude: activeRental.lng, type: 0 }]
         : undefined;
 
     async function endRide() {
-        if (!activeRental || ending) return;
-
-        lock()
-        await lockStatus == "Locked"
+        if (!activeRental || ending || lockBusy) return;
 
         setEnding(true);
+
+        const locked = await lock();
+        if (!locked) {
+            setEnding(false);
+            return;
+        }
+
         const { error } = await supabase
             .from("rentals")
             .update({ end_time: new Date().toISOString() })
@@ -69,13 +78,19 @@ export default function RentingPage() {
             </YStack>
 
             <Card flex={1} borderRadius="$10" overflow="hidden" elevation={5}>
-                <View flex={1}>
-                    <LocalMap
-                        APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY}
-                        pins={pins}
-                        centerLocation={pins?.[0]}
-                    />
-                </View>
+                {ending ? 
+                    <YStack alignItems="center" m={"$5"}>
+                        <H2 textAlign="center">Slide the lock closed to end your ride</H2> 
+                        <Image src={require("@/assets/images/instructions/bikelock.png")}></Image>
+                    </YStack> :
+                    <View flex={1}>
+                        <LocalMap
+                            APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY}
+                            pins={pins}
+                            centerLocation={pins?.[0]}
+                        />
+                    </View>
+                }
             </Card>
 
             <Card borderRadius="$10" p="$5" bg="$accentColor" elevation={4}>
@@ -84,12 +99,14 @@ export default function RentingPage() {
                     <Button circular size="$2" bg="$background" icon={MessageCircleQuestion} disabled opacity={0.4} />
                 </XStack>
                 <XStack justify={"space-between"} gap={"$3"}>
-                    <YStack items="center" gap="$2" opacity={lockStatus == null ? 0.4 : 1}>
-                        <Button circular color={"darkred"} size="$6" bg="$white" borderColor={"darkred"} borderWidth={"$1.5"} onPress={lockStatus == "Locked" ? unlock : lock} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
-                        <SizableText size="$2">{lockStatus == "Locked" ? "Unlock Bike" : lockStatus == "Unlocked" ? "Lock Bike" : "Disconnected"}</SizableText>
+                    <YStack items="center" gap="$2" opacity={lockBusy ? 0.6 : 1}>
+                        <Button circular color={"darkred"} size="$6" bg="$white" borderColor={"darkred"} borderWidth={"$1.5"} onPress={lockStatus == "Locked" ? unlock : lock} disabled={lockBusy} icon={lockBusy ? undefined : lockStatus == "Locked" ? LockOpen : Lock}>
+                            {lockBusy && <Spinner color="darkred" />}
+                        </Button>
+                        <SizableText size="$2">{locking ? "Locking…" : unlocking ? "Unlocking…" : lockStatus == "Locked" ? "Unlock Bike" : "Lock Bike"}</SizableText>
                     </YStack>
 
-                    <YStack flex={1} items="center" opacity={lockStatus == null ? 0.4 : 1} gap={"$2.5"}>
+                    <YStack flex={1} items="center" gap={"$2.5"}>
                         <AcceptSlider onAccept={endRide} label={ending ? "Ending…" : ""} width={225}/>
                         <SizableText size="$2">Slide to End Ride</SizableText>
                     </YStack>
