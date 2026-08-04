@@ -16,7 +16,9 @@ function formatElapsed(startTime?: string) {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor(totalSeconds / 60) % 60;
     const seconds = totalSeconds % 60;
-    return `${hours > 0 ? (hours + " hours, ") : ""}${minutes}:${seconds.toString().padStart(2, "0")}`;
+    const overtimeColor = hours >= 12 ? "red" : (hours >= 11 && hours < 12) ? "orange" : "black";
+    return <SizableText size="$5" opacity={0.6} color={overtimeColor}
+        >{hours > 0 ? (hours + " hours, ") : ""}{overtimeColor == "red" ? "Overtime!" : `${minutes}:${seconds.toString().padStart(2, "0")} elapsed`}</SizableText>
 }
 
 export default function RentingPage() {
@@ -27,6 +29,7 @@ export default function RentingPage() {
 
     const { status: lockStatus, lock, unlock, locking, unlocking, busy: lockBusy, error: lockError } = useLock('AXA-Lock');
 
+    //Handes the "elapesed" timer
     useEffect(() => {
         setElapsed(formatElapsed(activeRental?.startTime));
         const interval = setInterval(() => setElapsed(formatElapsed(activeRental?.startTime)), 1000);
@@ -74,7 +77,7 @@ export default function RentingPage() {
                     Currently Renting
                 </SizableText>
                 <H2 fontWeight="900">{activeRental?.bikeLabel ?? "Bike"}</H2>
-                <SizableText size="$5" opacity={0.6}>{elapsed} elapsed</SizableText>
+                {elapsed}
             </YStack>
 
             <Card flex={1} borderRadius="$10" overflow="hidden" elevation={5}>
@@ -110,20 +113,6 @@ export default function RentingPage() {
                         <AcceptSlider onAccept={endRide} label={ending ? "Ending…" : ""} width={225}/>
                         <SizableText size="$2">Slide to End Ride</SizableText>
                     </YStack>
-                    {/* <YStack items="center" gap="$2">
-                        <Button
-                            circular
-                            size="$6"
-                            bg="darkred"
-                            pressStyle={{ scale: 0.94 }}
-                            onPress={endRide}
-                            disabled={ending}
-                            icon={ending ? undefined : <Check size={26} color="white" />}
-                        >
-                            {ending && <Spinner color="white" />}
-                        </Button>
-                        <SizableText size="$2" fontWeight="700">End Ride</SizableText>
-                    </YStack> */}
                 </XStack>
             </Card>
         </YStack>
