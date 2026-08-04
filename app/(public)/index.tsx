@@ -1,74 +1,99 @@
-import React, { useEffect, useState } from 'react';
-import { View, Button, Text, Platform } from 'react-native';
-import { BleManager, Device } from 'react-native-ble-plx';
-import base64 from 'react-native-base64';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
-const manager = new BleManager();
+import NativeButton from '@/components/button/button';
+import LocalMap from '@/components/map/map';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
+import { supabase } from '@/lib/supabase';
+import { useSession } from '@/contexts/session';
+import { Button, SizableText, XStack, YStack } from 'tamagui';
+import { Apple, Play } from '@tamagui/lucide-icons-2';
 
-const SERVICE_UUID = '12345678-1234-1234-1234-123456789abc';
-const COMMAND_UUID = '12345678-1234-1234-1234-123456789abd';
+export default function HomeScreen() {
+  const { session, isAdmin } = useSession()
+  const user = session?.user
 
-export default function App() {
-  const [device, setDevice] = useState<Device | null>(null);
+  const insets = useSafeAreaInsets();
+
+  const [bicycles, setBicycles] = useState<any[]>([])
+  
+  const appState = useRef(AppState.currentState)
 
   useEffect(() => {
-    const subscription = manager.onStateChange((state) => {
-      if (state === 'PoweredOn') {
-        console.log('Bluetooth is on');
-        startScan();
+    getInstruments()
+    const interval = setInterval(getInstruments, 5_000)
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appState.current !== 'active' && nextState === 'active') {
+        getInstruments()
       }
-    }, true);
+      appState.current = nextState
+    })
 
-    return () => subscription.remove();
-  }, []);
-
-  const startScan = () => {
-    manager.startDeviceScan(null, null, (error, foundDevice) => {
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      if (foundDevice?.name === 'AXA-Lock') {
-        console.log('Found lock device:', foundDevice.id);
-        manager.stopDeviceScan();
-        setDevice(foundDevice);
-      }
-    });
-  };
-
-  const connectAndSend = async (command: 'LOCK' | 'UNLOCK') => {
-    if (!device) {
-      console.log('No device found');
-      return;
+    return () => {
+      clearInterval(interval)
+      subscription.remove()
     }
+  }, [])
 
-    try {
-      const connected = await device.connect();
-      await connected.discoverAllServicesAndCharacteristics();
+  async function getInstruments() {
+    const { data } = await supabase.from('bicycles').select()
+    setBicycles(data || [])
+  }
 
-      const payload = base64.encode(command);
-      await connected.writeCharacteristicWithResponseForService(
-        SERVICE_UUID,
-        COMMAND_UUID,
-        payload
-      );
-
-      console.log(`Sent ${command}`);
-      await connected.cancelConnection();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const pins = bicycles
+    .filter((bicycle: any) => bicycle.lat != null && bicycle.lng != null)
+    .map((bicycle: any) => ({
+      name: `WPI${bicycle.bike_id}`,
+      latitude: Number(bicycle.lat),
+      longitude: Number(bicycle.lng),
+      type: Number(bicycle.quality),
+    }))
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16 }}>
-      <Text style={{ fontSize: 18 }}>
-        {device ? `Connected to ${device.name || device.id}` : 'Scanning for AXA-Lock...'}
-      </Text>
-
-      <Button title="Lock" onPress={() => connectAndSend('LOCK')} />
-      <Button title="Unlock" onPress={() => connectAndSend('UNLOCK')} />
+    <View style={{flex: 1}}>
+      {/* <Text style={{marginTop: insets.top}}>{pins[0].name}</Text> */}
+      <LocalMap APIKey={process.env.EXPO_PUBLIC_GMAPS_API_KEY} pins={pins}/>
+      { Platform.OS == "web" && <XStack position='absolute' bottom={"$5"} width={"100%"} justify={"center"}>
+        <YStack bg={"white"} borderRadius={"$8"} p="$5" justify={"center"} alignItems='center' gap="$4" $md={{flexDirection: "row"}}>
+          <SizableText fontWeight={"bold"} size={"$6"}>Download the app to get started!</SizableText>
+          <XStack gap="$4">
+            <Button icon={Apple} bg={"black"} size={"$2"}><SizableText>App Store</SizableText></Button>
+            <Button icon={Play} bg={"black"} size={"$2"}><SizableText>Play Store</SizableText></Button>
+          </XStack>
+        </YStack>
+      </XStack>}
+      <Image style={{position: "absolute", top: insets.top + 10, left: "50%", height: 65, width: 65, transform: "translate(-50%, 0%)"}} source={require("@/assets/images/appicon240.png")}/>
+      <View style={{position: "absolute", top: insets.top + 5, right: 25}}>
+        <NativeButton link='/(public)/modal/account' icon={require("@/assets/images/person-crop-circle.png")}></NativeButton>
+      </View>
+      {isAdmin && <View style={{position: "absolute", top: insets.top + 5, left: 25}}>
+        <NativeButton link='/admin' icon={require("@/assets/images/bolt-circle.png")}></NativeButton>
+      </View>}
+      <View style={{position: "absolute", bottom: 25, left: "50%", transform: "translate(-50%, 0%)"}}>
+        <NativeButton mobileOnly link={user ? '/(public)/qrcode' : "/(public)/modal/account"} title='Scan QR Code' icon={require("@/assets/images/qrcode.png")} ih={30} iw={30} w={300} h={60}></NativeButton>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+  },
+});

@@ -12,6 +12,7 @@ import { SessionProvider, useSession } from '@/contexts/session';
 import { Text } from 'tamagui';
 import NativeButton from '@/components/button/button';
 import { ArrowLeft, ArrowLeftCircle, ChevronLast, ChevronLeft, PanelBottomClose } from '@tamagui/lucide-icons-2';
+import LockHandler from '@/components/lock-handler';
 
 function RootNavigator() {
   const { isAdmin, isLoading, activeRental } = useSession();
@@ -61,7 +62,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <TamaguiProvider config={config} defaultTheme="light">
         <SessionProvider>
-          <RootNavigator />
+            <RootNavigator />
         </SessionProvider>
         <StatusBar style="auto" animated />
       </TamaguiProvider>

@@ -1,7 +1,9 @@
+import LockHandler from "@/components/lock-handler";
 import LocalMap from "@/components/map/map";
+// import { useLock } from "@/contexts/lock";
 import { useSession } from "@/contexts/session";
 import { supabase } from "@/lib/supabase";
-import { Check, Lock, MessageCircleQuestion, Pause } from "@tamagui/lucide-icons-2";
+import { Check, Lock, LockOpen, MessageCircleQuestion, Pause } from "@tamagui/lucide-icons-2";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -18,9 +20,13 @@ function formatElapsed(startTime?: string) {
 
 export default function RentingPage() {
     const insets = useSafeAreaInsets();
+    // const { lockState, setLockStatus } = useLock();
     const { activeRental, refreshActiveRental } = useSession();
     const [ending, setEnding] = useState(false);
     const [elapsed, setElapsed] = useState(() => formatElapsed(activeRental?.startTime));
+
+    const [lockStatus, setLockStatus] = useState<String | null>(null)
+    const [lockSet, setLockSet] = useState<boolean | null>(null)
 
     useEffect(() => {
         setElapsed(formatElapsed(activeRental?.startTime));
@@ -74,9 +80,9 @@ export default function RentingPage() {
             <Card borderRadius="$10" p="$5" bg="$accentColor" elevation={4}>
                 <SizableText size="$5" fontWeight="700" mb="$4">Ride Options</SizableText>
                 <XStack justify="space-around">
-                    <YStack items="center" gap="$2" opacity={0.4}>
-                        <Button circular size="$6" bg="$background" icon={Lock} disabled />
-                        <SizableText size="$2">Lock Bike</SizableText>
+                    <YStack items="center" gap="$2" opacity={lockStatus == null ? 0.4 : 1}>
+                        <Button circular size="$6" bg="$background" onPress={lockStatus == "Locked" ? () => {setLockSet(false)} : () => {setLockSet(true)}} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
+                        <SizableText size="$2">{lockStatus == "Locked" ? "Unlock Bike" : lockStatus == "Unlocked" ? "Lock Bike" : "Disconnected"}</SizableText>
                     </YStack>
 
                     <YStack items="center" gap="$2" opacity={0.4}>
@@ -100,6 +106,7 @@ export default function RentingPage() {
                     </YStack>
                 </XStack>
             </Card>
+            <LockHandler statusSetter={setLockStatus} desiredState={lockSet} desiredStateSetter={setLockSet}/>
         </YStack>
     );
 }
