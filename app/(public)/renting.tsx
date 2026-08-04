@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, H2, SizableText, Spinner, View, XStack, YStack } from "tamagui";
+import AcceptSlider from "@/components/acceptslider";
 
 function formatElapsed(startTime?: string) {
     if (!startTime) return "0:00";
@@ -37,6 +38,9 @@ export default function RentingPage() {
 
     async function endRide() {
         if (!activeRental || ending) return;
+
+        lock()
+        await lockStatus == "Locked"
 
         setEnding(true);
         const { error } = await supabase
@@ -75,19 +79,21 @@ export default function RentingPage() {
             </Card>
 
             <Card borderRadius="$10" p="$5" bg="$accentColor" elevation={4}>
-                <SizableText size="$5" fontWeight="700" mb="$4">Ride Options</SizableText>
-                <XStack justify="space-around">
+                <XStack flex={0} justifyContent="space-between">
+                    <SizableText size="$5" fontWeight="700" mb="$4">Ride Options</SizableText>
+                    <Button circular size="$2" bg="$background" icon={MessageCircleQuestion} disabled opacity={0.4} />
+                </XStack>
+                <XStack justify={"space-between"} gap={"$3"}>
                     <YStack items="center" gap="$2" opacity={lockStatus == null ? 0.4 : 1}>
-                        <Button circular size="$6" bg="$background" onPress={lockStatus == "Locked" ? unlock : lock} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
+                        <Button circular color={"darkred"} size="$6" bg="$white" borderColor={"darkred"} borderWidth={"$1.5"} onPress={lockStatus == "Locked" ? unlock : lock} icon={lockStatus == "Locked" ? LockOpen : Lock} disabled={lockStatus == null} />
                         <SizableText size="$2">{lockStatus == "Locked" ? "Unlock Bike" : lockStatus == "Unlocked" ? "Lock Bike" : "Disconnected"}</SizableText>
                     </YStack>
 
-                    <YStack items="center" gap="$2" opacity={0.4}>
-                        <Button circular size="$6" bg="$background" icon={MessageCircleQuestion} disabled />
-                        <SizableText size="$2">Get Help</SizableText>
+                    <YStack flex={1} items="center" opacity={lockStatus == null ? 0.4 : 1} gap={"$2.5"}>
+                        <AcceptSlider onAccept={endRide} label={ending ? "Ending…" : ""} width={225}/>
+                        <SizableText size="$2">Slide to End Ride</SizableText>
                     </YStack>
-
-                    <YStack items="center" gap="$2">
+                    {/* <YStack items="center" gap="$2">
                         <Button
                             circular
                             size="$6"
@@ -100,7 +106,7 @@ export default function RentingPage() {
                             {ending && <Spinner color="white" />}
                         </Button>
                         <SizableText size="$2" fontWeight="700">End Ride</SizableText>
-                    </YStack>
+                    </YStack> */}
                 </XStack>
             </Card>
         </YStack>

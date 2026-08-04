@@ -10,6 +10,7 @@ import LocalMap from "@/components/map/map";
 import { supabase } from "@/lib/supabase";
 import { Alert, Platform } from "react-native";
 import { useSession } from "@/contexts/session";
+import { useLock } from "@/hooks/use-lock";
 
 export default function RentPage() {
     const [agreed, setAgreed] = useState(false)
@@ -21,6 +22,8 @@ export default function RentPage() {
     const [bicycles, setBicycles] = useState<any[]>([])
     const [starting, setStarting] = useState(false)
     const [rentalPage, setRentalPage] = useState(0)
+    
+    const { status: lockStatus, lock, unlock } = useLock('AXA-Lock');
 
     useEffect(() => {
         setAgreed(hasAgreedToTerms)
@@ -74,12 +77,8 @@ export default function RentPage() {
             return
         }
 
-        // await lockState.startsWith("L") || lockState.startsWith("T")
-
-        // if(lockState.startsWith("L")) {
-        //     setLockStatus(false)
-        //     await lockState.startsWith("T")
-        // }
+        unlock()
+        await lockStatus == "Unlocked"
 
         setStarting(false)
         

@@ -31,6 +31,17 @@ export function useLock(deviceName: string) {
     let monitorSub: { remove: () => void } | null = null;
     let disconnectSub: { remove: () => void } | null = null;
 
+    const startScan = () => {
+      manager.startDeviceScan(null, null, (error, found) => {
+        if (error || cancelled) return;
+
+        if (found?.name === deviceName) {
+          manager.stopDeviceScan();
+          connectToDevice(found);
+        }
+      });
+    };
+
     const connectToDevice = async (found: Device) => {
       try {
         const connected = await found.connect();
@@ -57,26 +68,20 @@ export function useLock(deviceName: string) {
           disconnectSub?.remove();
           deviceRef.current = null;
           setStatus(null);
+          if (!cancelled) startScan();
         });
 
         const char = await connected.readCharacteristicForService(SERVICE_UUID, STATE_UUID);
         if (char?.value) setStatus(decodeState(char.value));
       } catch (err) {
         console.error('Lock connect failed:', err);
+        if (!cancelled) startScan();
       }
     };
 
     const stateSub = manager.onStateChange((state) => {
       if (state !== 'PoweredOn') return;
-
-      manager.startDeviceScan(null, null, (error, found) => {
-        if (error || cancelled) return;
-
-        if (found?.name === deviceName) {
-          manager.stopDeviceScan();
-          connectToDevice(found);
-        }
-      });
+      startScan();
     }, true);
 
     return () => {

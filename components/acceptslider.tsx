@@ -15,19 +15,21 @@ import { ChevronsRight, CircleCheck } from "@tamagui/lucide-icons-2";
 import { SizableText, View } from "tamagui";
 
 const TRACK_WIDTH = 300;
-const TRACK_HEIGHT = 56;
+const TRACK_HEIGHT = 60;
 const THUMB_PADDING = 4;
 const THUMB_SIZE = TRACK_HEIGHT - THUMB_PADDING * 2;
-const MAX_TRANSLATE = TRACK_WIDTH - THUMB_SIZE - THUMB_PADDING * 2;
 const COMPLETE_THRESHOLD = 0.7;
 const SPRING_BACK = { damping: 16, stiffness: 200, mass: 0.6 };
 
 type AcceptSliderProps = {
     onAccept: () => void;
     label?: string;
+    width?: number;
 };
 
-export default function AcceptSlider({ onAccept, label = "Slide to Accept" }: AcceptSliderProps) {
+export default function AcceptSlider({ onAccept, label = "Slide to Accept", width = TRACK_WIDTH }: AcceptSliderProps) {
+    const MAX_TRANSLATE = width - THUMB_SIZE - THUMB_PADDING * 2;
+
     const translateX = useSharedValue(0);
     const startX = useSharedValue(0);
 
@@ -78,7 +80,7 @@ export default function AcceptSlider({ onAccept, label = "Slide to Accept" }: Ac
 
     return (
         <View
-            width={TRACK_WIDTH}
+            width={width}
             height={TRACK_HEIGHT}
             bg="$backgroundPress"
             borderRadius={TRACK_HEIGHT / 2}
