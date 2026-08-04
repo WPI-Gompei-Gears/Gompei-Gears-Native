@@ -71,6 +71,27 @@ function scanAndConnect(deviceName: string, signal: { cancelled: boolean }): Pro
   });
 }
 
+// Bare BLE connection attempt with no service discovery or action performed —
+// a lightweight proximity check for "is the phone near the lock right now?".
+export async function attemptLockConnection(
+  deviceName: string,
+  timeoutMs: number = CONNECT_TIMEOUT_MS
+): Promise<boolean> {
+  const signal = { cancelled: false };
+  let device: Device | null = null;
+
+  try {
+    device = await withTimeout(scanAndConnect(deviceName, signal), timeoutMs, 'Could not find the lock');
+    return true;
+  } catch {
+    return false;
+  } finally {
+    signal.cancelled = true;
+    manager.stopDeviceScan();
+    device?.cancelConnection();
+  }
+}
+
 // Connects to `deviceName` only for the duration of a lock()/unlock() call.
 // Stays connected until the device's state characteristic actually confirms
 // the requested state (or the confirmation times out), then disconnects.

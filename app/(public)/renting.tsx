@@ -1,5 +1,6 @@
 import LocalMap from "@/components/map/map";
 import { useLock } from "@/hooks/use-lock";
+import { useLocationLockSync } from "@/hooks/use-location-lock-sync";
 import { useSession } from "@/contexts/session";
 import { supabase } from "@/lib/supabase";
 import { Check, Lock, LockOpen, MessageCircleQuestion, Pause } from "@tamagui/lucide-icons-2";
@@ -28,6 +29,7 @@ export default function RentingPage() {
     const [elapsed, setElapsed] = useState(() => formatElapsed(activeRental?.startTime));
 
     const { status: lockStatus, lock, unlock, locking, unlocking, busy: lockBusy, error: lockError } = useLock('AXA-Lock');
+    useLocationLockSync('AXA-Lock', activeRental?.sidewalkId ?? null);
 
     //Handes the "elapesed" timer
     useEffect(() => {

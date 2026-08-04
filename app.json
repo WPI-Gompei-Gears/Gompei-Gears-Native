@@ -50,7 +50,13 @@
         }
       ],
       "expo-sqlite",
-      "react-native-ble-plx"
+      "react-native-ble-plx",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Gompei's Gears uses your location while you're renting a bike to help pinpoint where it's parked."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

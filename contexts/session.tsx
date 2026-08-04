@@ -8,6 +8,7 @@ type ActiveRental = {
   startTime: string;
   lat: number | null;
   lng: number | null;
+  sidewalkId: string | null;
 };
 
 type SessionContextValue = {
@@ -89,7 +90,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setIsRentalLoading(true);
     const { data } = await supabase
       .from('rentals')
-      .select('id, start_time, bicycles(bike_id, lat, lng)')
+      .select('id, start_time, bicycles(bike_id, lat, lng, sidewalk_id)')
       .eq('user_id', userId)
       .is('end_time', null)
       .maybeSingle();
@@ -102,6 +103,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       startTime: data.start_time,
       lat: bicycle?.lat != null ? Number(bicycle.lat) : null,
       lng: bicycle?.lng != null ? Number(bicycle.lng) : null,
+      sidewalkId: bicycle?.sidewalk_id ?? null,
     } : null);
     setIsRentalLoading(false);
   }, []);
