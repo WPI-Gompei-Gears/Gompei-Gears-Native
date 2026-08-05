@@ -12,13 +12,13 @@ import NativeButton from '@/components/button/button';
 
 export default function BikeRoute() {
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, start, end } = useLocalSearchParams<{ id: string, start?: string, end?: string }>();
 
   const [route, setRoute] = useState<{ latitude: number, longitude: number }[]>([]);
 
   useEffect(() => {
     if (id) getLocations();
-  }, [id]);
+  }, [id, start, end]);
 
   async function getLocations() {
     const { data: bicycle } = await supabase
@@ -32,11 +32,15 @@ export default function BikeRoute() {
       return;
     }
 
-    const { data: locations } = await supabase
+    let query = supabase
       .from('sidewalk_locations')
       .select()
-      .eq('wireless_device_id', bicycle.sidewalk_id)
-      .order('resolved_at', { ascending: true });
+      .eq('wireless_device_id', bicycle.sidewalk_id);
+
+    if (start) query = query.gte('resolved_at', start);
+    if (end) query = query.lte('resolved_at', end);
+
+    const { data: locations } = await query.order('resolved_at', { ascending: true });
 
     setRoute(
       (locations || [])
@@ -51,7 +55,7 @@ export default function BikeRoute() {
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top/2 }]}>
       <View style={styles.header}>
-        <ThemedText type="title">History | WPI {id}</ThemedText>
+        <ThemedText type="title">{start ? 'Ride History' : 'History'} | WPI {id}</ThemedText>
         <TouchableOpacity onPress={() => router.back()}>
           <X size={"$2"} />
         </TouchableOpacity>
