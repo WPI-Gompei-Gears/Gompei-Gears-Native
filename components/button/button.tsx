@@ -14,6 +14,7 @@ export default function NativeButton({
     ih,
     p,
     link,
+    dismissTo,
     onPress,
     mobileOnly,
     webOnly,
@@ -29,6 +30,7 @@ export default function NativeButton({
     ih? : DimensionValue,
     p? : DimensionValue,
     link? : Href,
+    dismissTo? : boolean,
     onPress? : ((event: GestureResponderEvent) => void) | undefined,
     mobileOnly? : boolean,
     webOnly? : boolean,
@@ -59,7 +61,7 @@ export default function NativeButton({
 
     if(!mobileOnly || (webOnly && Platform.OS != "web")) {
         return link ? (
-            <Link href={link}>
+            <Link href={link} dismissTo={dismissTo}>
                 {button}
             </Link>
         ) : button

@@ -9,7 +9,7 @@ import config from './tamagui.config' // your configuration
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '@/contexts/session';
-import { Text } from 'tamagui';
+import { PortalProvider, Text } from 'tamagui';
 import NativeButton from '@/components/button/button';
 import { ArrowLeft, ArrowLeftCircle, ChevronLast, ChevronLeft, PanelBottomClose } from '@tamagui/lucide-icons-2';
 
@@ -58,10 +58,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <TamaguiProvider config={config} defaultTheme="light">
-        <SessionProvider>
-            <RootNavigator />
-        </SessionProvider>
-        <StatusBar style="auto" animated />
+          <SessionProvider>
+              <RootNavigator />
+          </SessionProvider>
+          <StatusBar style="auto" animated />
       </TamaguiProvider>
     </GestureHandlerRootView>
   );

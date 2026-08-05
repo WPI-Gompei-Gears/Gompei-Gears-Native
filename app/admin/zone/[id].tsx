@@ -123,7 +123,7 @@ export default function AdminZoneEditor() {
         centerLocation={points[0]}
       />
       <Card borderRadius={20} px="$2" elevation={5} width={"90%"} left={"5%"} position='absolute' top={insets.top}>
-        <TitleBar title={isNew ? 'New Zone' : 'Edit Zone'} returnLink={"/admin"}></TitleBar>
+        <TitleBar title={isNew ? 'New Zone' : 'Edit Zone'} returnLink={"/admin"} dismissTo></TitleBar>
       </Card>
       <Sheet
         open={sheetOpen}

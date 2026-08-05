@@ -30,7 +30,7 @@ export default function AdminFleet() {
   }
 
   return (
-        <Tabs defaultValue="settings" flex={1} mt={insets.top + 20} px={"$4"} alignItems={"center"}>
+        <Tabs defaultValue="settings" flex={1} mt={insets.top + 20} px={"$4"} alignItems={"center"} width={"100%"}>
           <Tabs.List elevation={"$2"} justify={"center"} mb={"$4"} width={"max-content"}>
             <Tabs.Tab value="settings">
               <SizableText>Fleet Settings</SizableText>
@@ -40,7 +40,7 @@ export default function AdminFleet() {
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Content value="settings">
+          <Tabs.Content value="settings" width={"100%"}>
             <TitleBar title='Fleet Settings' returnLink={"/(public)"}></TitleBar>
             <Form mt={"$4"} gap={"$4"} onSubmit={() => {}}>
               <FormInput title="Agreement URL" value={agreementUrl} onChangeText={setAgreementUrl}/>

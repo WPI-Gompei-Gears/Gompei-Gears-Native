@@ -79,7 +79,7 @@ export default function RentingPage() {
                     Currently Renting
                 </SizableText>
                 <H2 fontWeight="900">{activeRental?.bikeLabel ?? "Bike"}</H2>
-                {elapsed}
+                <View>{elapsed}</View>
             </YStack>
 
             <Card flex={1} borderRadius="$10" overflow="hidden" elevation={5}>
